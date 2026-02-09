@@ -29,6 +29,13 @@
       "env": {
         "PEXELS_API_KEY": "${PEXELS_API_KEY}"
       }
+    },
+    "Replicate": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.replicate.com/sse"],
+      "env": {
+        "REPLICATE_API_TOKEN": "${REPLICATE_API_TOKEN}"
+      }
     }
   }
 }

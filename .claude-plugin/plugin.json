@@ -1,7 +1,7 @@
 {
   "name": "remotion-superpowers",
-  "version": "1.0.0",
-  "description": "Full video production pipeline for Remotion — gives Claude eyes (video analysis), voice (TTS/voiceover), ears (music/SFX), and stock footage. One plugin to rule them all. By Dojo Coding Labs.",
+  "version": "2.0.0",
+  "description": "Full video production pipeline for Remotion — gives Claude eyes (video analysis), voice (TTS/voiceover), ears (music/SFX), stock footage, AI image/video generation, TikTok captions, 3D content, and more. By Dojo Coding Labs.",
   "author": {
     "name": "Dojo Coding Labs",
     "url": "https://dojocoding.io"
@@ -20,10 +20,19 @@
     "music-generation",
     "stock-footage",
     "video-analysis",
+    "captions",
+    "tiktok",
+    "shorts",
+    "reels",
+    "ai-video",
+    "ai-image",
+    "3d",
+    "transitions",
     "elevenlabs",
     "suno",
     "pexels",
     "twelvelabs",
+    "replicate",
     "mcp",
     "vibecoding",
     "dojo-coding"

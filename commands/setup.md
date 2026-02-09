@@ -90,6 +90,14 @@ Walk the user through each API key. For each one:
 - **Persistence:** `echo 'export ELEVENLABS_API_KEY=your-key-here' >> ~/.zshrc`
 - **Note:** This is optional. Skip if you don't need voice cloning or custom voices.
 
+### 4e. Replicate API Token (OPTIONAL — advanced AI image/video models)
+- **What:** Access to 100+ AI models on Replicate — FLUX for images, Wan/Kling/Veo for video generation, image-to-video, upscaling, and more. Goes beyond the built-in KIE models when you need specific styles or capabilities.
+- **Signup:** https://replicate.com — create account, get API token from dashboard
+- **Variable:** `REPLICATE_API_TOKEN`
+- **Command:** `export REPLICATE_API_TOKEN=your-token-here`
+- **Persistence:** `echo 'export REPLICATE_API_TOKEN=your-token-here' >> ~/.zshrc`
+- **Note:** This is optional. Skip if the built-in image/video generation from KIE is sufficient.
+
 After each key, ask the user to confirm they've set it before moving to the next one. It's OK to skip optional ones.
 
 ## Step 5: Reload Shell & Verify
@@ -105,6 +113,7 @@ echo "KIE_API_KEY: ${KIE_API_KEY:+SET}"
 echo "TWELVELABS_API_KEY: ${TWELVELABS_API_KEY:+SET}"
 echo "PEXELS_API_KEY: ${PEXELS_API_KEY:+SET}"
 echo "ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:+SET}"
+echo "REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN:+SET}"
 ```
 
 ## Step 6: Verify MCP Connections
@@ -125,7 +134,7 @@ All configured servers should show as connected. If any fail:
 Print a summary:
 
 ```
-🎬 Remotion Superpowers — Setup Complete!
+🎬 Remotion Superpowers v2.0 — Setup Complete!
 
 ✓ Dependencies verified
 ✓ Remotion project detected
@@ -133,12 +142,27 @@ Print a summary:
 ✓ API keys configured
 ✓ MCP servers connected
 
-Available commands:
-  /create-video     — Full video production from a prompt
-  /find-footage     — Search & download stock footage from Pexels
-  /analyze-footage  — Analyze existing video files with AI vision
-  /add-voiceover    — Generate and add narration to your video
-  /add-music        — Generate and add background music
+🎬 Production Commands:
+  /create-video      — Full video production from a prompt
+  /create-short      — Short-form vertical video (TikTok/Reels/Shorts)
+
+🎨 Asset Commands:
+  /find-footage      — Search & download stock footage from Pexels
+  /generate-image    — Generate AI images for your video
+  /generate-clip     — Generate AI video clips
+
+🔊 Audio Commands:
+  /add-voiceover     — Generate and add narration
+  /add-music         — Generate and add background music
+  /transcribe        — Transcribe audio/video to text
+
+✨ Enhancement Commands:
+  /add-captions      — TikTok-style animated captions
+  /add-transitions   — Professional scene transitions
+
+👁️ Analysis Commands:
+  /analyze-footage   — Analyze existing video files with AI vision
+  /review-video      — AI feedback loop on rendered output
 
 Try it: "Create a 30-second product demo video for a todo app"
 ```

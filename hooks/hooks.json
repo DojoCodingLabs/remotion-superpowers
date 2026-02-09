@@ -31,7 +31,34 @@
       },
       "action": {
         "type": "post_note",
-        "message": "Remember: Pexels content is free but attribution is appreciated. Consider adding 'Media by Pexels' to your video credits."
+        "message": "Remember: Pexels content is free but attribution is appreciated. Consider adding 'Media by Pexels' in your video credits."
+      }
+    },
+    {
+      "event": "on_tool_call",
+      "description": "Check Replicate API availability before AI image/video generation",
+      "matcher": {
+        "tool_names": [
+          "replicate_run",
+          "replicate_create_prediction"
+        ]
+      },
+      "action": {
+        "type": "pre_check",
+        "message": "Checking Replicate MCP server... If this fails, run /setup to configure your REPLICATE_API_TOKEN."
+      }
+    },
+    {
+      "event": "on_tool_call",
+      "description": "Remind to add captions for social media videos",
+      "matcher": {
+        "tool_names": [
+          "render"
+        ]
+      },
+      "action": {
+        "type": "post_note",
+        "message": "Tip: If this video is for social media, consider adding TikTok-style captions with /add-captions. 85% of social videos are watched without sound."
       }
     }
   ]

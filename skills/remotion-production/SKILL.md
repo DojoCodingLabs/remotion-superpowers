@@ -48,6 +48,12 @@ Read individual rule files for detailed workflows:
 - `rules/music-scoring.md` — Generating and timing background music
 - `rules/stock-footage-workflow.md` — Searching, downloading, and using stock footage in Remotion
 - `rules/video-analysis.md` — Using TwelveLabs to analyze and select clips from existing footage
+- `rules/captions-workflow.md` — TikTok-style animated captions using @remotion/captions and Whisper
+- `rules/animation-presets.md` — Reusable animation patterns (fade, slide, scale, typewriter, stagger)
+- `rules/3d-content.md` — Three.js and React Three Fiber via @remotion/three
+- `rules/data-visualization.md` — Animated charts, dashboards, and number counters
+- `rules/visual-effects.md` — Light leaks, Lottie, film grain, vignettes, Ken Burns
+- `rules/ci-rendering.md` — GitHub Actions workflows for automated video rendering
 
 ## Key Principles
 
