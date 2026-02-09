@@ -38,6 +38,13 @@ You have access to these MCP servers for media production:
 - Audio isolation and processing
 - Transcription
 
+### Replicate (optional — 100+ AI models)
+- `replicate_run` — Run a model synchronously (images)
+- `replicate_create_prediction` — Start async prediction (video)
+- `replicate_get_prediction` — Poll prediction status
+- Image models: FLUX 1.1 Pro, Imagen 4, Ideogram v3, FLUX Kontext
+- Video models: Wan 2.5 (T2V, I2V), Kling 2.6 Pro
+
 ## Production Pipeline
 
 Read individual rule files for detailed workflows:
@@ -54,6 +61,12 @@ Read individual rule files for detailed workflows:
 - `rules/data-visualization.md` — Animated charts, dashboards, and number counters
 - `rules/visual-effects.md` — Light leaks, Lottie, film grain, vignettes, Ken Burns
 - `rules/ci-rendering.md` — GitHub Actions workflows for automated video rendering
+- `rules/replicate-models.md` — Replicate MCP model catalog, usage, and decision guide
+- `rules/image-generation.md` — AI image prompt engineering, provider selection, Remotion integration
+- `rules/video-generation.md` — AI video clip generation, I2V pipeline, sequencing in Remotion
+- `rules/sound-effects.md` — SFX generation, prompt engineering, timing to visual events
+- `rules/elevenlabs-advanced.md` — Voice cloning, custom TTS parameters, multi-voice scripts
+- `rules/asset-management.md` — File organization, naming conventions, staticFile() reference
 
 ## Key Principles
 

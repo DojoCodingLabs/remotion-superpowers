@@ -41,33 +41,44 @@ Use remotion-media generate_video:
 
 The clip is saved to the project's `public/` directory.
 
-### 4. Generate via Replicate (if available)
+### 4. Generate via Replicate MCP (if available)
 
-If the user has `REPLICATE_API_TOKEN` and wants specific models:
+If the user has `REPLICATE_API_TOKEN` and wants specific models, use the Replicate MCP tools:
 
 **Text-to-Video:**
-```bash
+```
 # Wan 2.5 (open source, fast)
-curl -s -X POST "https://api.replicate.com/v1/predictions" \
-  -H "Authorization: Bearer $REPLICATE_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "wan-video/wan-2.5-t2v-fast", "input": {"prompt": "[prompt]", "num_frames": 81}}'
+replicate_create_prediction:
+  model: "wan-video/wan-2.5-t2v-fast"
+  input:
+    prompt: "[crafted prompt]"
+    num_frames: 81
+    resolution: "480p"
 ```
 
 **Image-to-Video (animate a still):**
-```bash
+```
 # Kling 2.6 (cinematic, top-tier I2V)
-curl -s -X POST "https://api.replicate.com/v1/predictions" \
-  -H "Authorization: Bearer $REPLICATE_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "kwaivgi/kling-v2.6-pro", "input": {"image": "[image_url]", "prompt": "[motion description]"}}'
+replicate_create_prediction:
+  model: "kwaivgi/kling-v2.6-pro"
+  input:
+    image: "[image_url]"
+    prompt: "[motion description]"
+    duration: 5
+```
+
+Poll with `replicate_get_prediction` until status is `succeeded`, then download the output:
+```bash
+curl -o public/footage/[descriptive-name].mp4 "[replicate_output_url]"
 ```
 
 **Model recommendations:**
-- **Fast & cheap**: Wan 2.5 Fast (~40s for 5s clip at 480p)
+- **Fast & cheap**: Wan 2.5 Fast (`wan-video/wan-2.5-t2v-fast`) — ~40s for 5s clip
 - **High quality**: Veo 3.1 (via remotion-media) or Kling 2.6
-- **Image-to-video**: Kling 2.6 Pro or Wan 2.5 I2V
-- **Open source**: Wan 2.2 (runs on consumer GPUs)
+- **Image-to-video**: Kling 2.6 Pro (`kwaivgi/kling-v2.6-pro`) or Wan 2.5 I2V
+- **Open source**: Wan 2.5 (`wan-video/wan-2.5-t2v`) — higher quality, slower
+
+See `skills/remotion-production/rules/replicate-models.md` and `rules/video-generation.md` for detailed prompt engineering and model selection guidance.
 
 ### 5. Show Usage in Remotion
 

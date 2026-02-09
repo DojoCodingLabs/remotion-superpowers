@@ -15,6 +15,7 @@ You have access to these MCP tools:
 - **TwelveLabs**: Analyze and understand existing video footage
 - **Pexels**: Search and source free stock footage and photos
 - **ElevenLabs** (optional): Advanced voice cloning and custom TTS
+- **Replicate** (optional): 100+ AI models — FLUX, Imagen 4, Ideogram (images), Wan, Kling (video)
 
 You also have deep knowledge of Remotion through the `remotion-production` and `remotion-best-practices` skills.
 

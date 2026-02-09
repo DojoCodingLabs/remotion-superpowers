@@ -43,23 +43,32 @@ Use remotion-media generate_image:
 
 The image is saved to the project's `public/` directory.
 
-### 4. Generate via Replicate (if available)
+### 4. Generate via Replicate MCP (if available)
 
-If the user has `REPLICATE_API_TOKEN` set and wants more model options:
+If the user has `REPLICATE_API_TOKEN` set and wants more model options, use the Replicate MCP tools:
 
-```bash
+```
 # FLUX for high-quality images
-curl -s -X POST "https://api.replicate.com/v1/predictions" \
-  -H "Authorization: Bearer $REPLICATE_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "black-forest-labs/flux-1.1-pro", "input": {"prompt": "[prompt]", "aspect_ratio": "16:9"}}'
+replicate_run:
+  model: "black-forest-labs/flux-1.1-pro"
+  input:
+    prompt: "[crafted prompt]"
+    aspect_ratio: "16:9"
+    output_format: "png"
+```
+
+Download the output to the project:
+```bash
+curl -o public/images/[descriptive-name].png "[replicate_output_url]"
 ```
 
 Available Replicate models:
-- **FLUX 1.1 Pro** — High quality, great prompt following
-- **Imagen 4** — Google's latest, photorealistic
-- **Ideogram v3** — Best for text-in-image
-- **FLUX Kontext** — Style control, multi-reference
+- **FLUX 1.1 Pro** (`black-forest-labs/flux-1.1-pro`) — High quality, great prompt following
+- **Imagen 4** (`google/imagen-4`) — Google's latest, photorealistic
+- **Ideogram v3** (`ideogram-ai/ideogram-v3`) — Best for text-in-image
+- **FLUX Kontext** (`black-forest-labs/flux-kontext-pro`) — Style control, multi-reference
+
+See `skills/remotion-production/rules/replicate-models.md` and `rules/image-generation.md` for detailed prompt engineering and model selection guidance.
 
 ### 5. Show Usage in Remotion
 
