@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "remotion-superpowers",
-  "version": "1.0.0",
-  "description": "Full video production pipeline for Remotion — gives Claude eyes (video analysis), voice (TTS/voiceover), ears (music/SFX), and stock footage. One plugin to rule them all.",
+  "version": "2.0.0",
+  "description": "Full video production pipeline for Remotion — gives Claude eyes (video analysis), voice (TTS/voiceover), ears (music/SFX), stock footage, AI image/video generation, TikTok captions, 3D content, and more. By Dojo Coding Labs.",
   "owner": {
     "name": "Dojo Coding Labs",
     "email": "team@dojocoding.io"
@@ -10,8 +10,8 @@
   "plugins": [
     {
       "name": "remotion-superpowers",
-      "description": "Complete video production orchestrator for Remotion. Generates voiceovers (ElevenLabs TTS), background music (Suno), sound effects, stock footage (Pexels), and analyzes existing video (TwelveLabs) — all wired into Remotion compositions. One /create-video command produces a full video from a text prompt.",
-      "version": "1.0.0",
+      "description": "Full video production studio for Remotion. AI voiceovers (ElevenLabs), music (Suno), sound effects, stock footage (Pexels), AI image/video generation (Replicate), TikTok-style captions, 3D content, transitions, video analysis & review (TwelveLabs) — all wired into Remotion compositions. 13 slash commands, 3 agents, 5 MCP servers.",
+      "version": "2.0.0",
       "author": {
         "name": "Dojo Coding Labs",
         "email": "team@dojocoding.io"
@@ -22,16 +22,27 @@
       "keywords": [
         "claude-code",
         "claude-code-plugin",
+        "claude",
+        "anthropic",
         "remotion",
         "video-production",
         "text-to-speech",
         "music-generation",
         "stock-footage",
         "video-analysis",
+        "captions",
+        "tiktok",
+        "shorts",
+        "reels",
+        "ai-video",
+        "ai-image",
+        "3d",
+        "transitions",
         "elevenlabs",
         "suno",
         "pexels",
         "twelvelabs",
+        "replicate",
         "mcp",
         "vibecoding",
         "dojo-coding"

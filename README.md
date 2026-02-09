@@ -1,5 +1,13 @@
 # 🎬 Remotion Superpowers v2.0
 
+[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blue?logo=anthropic&logoColor=white)](https://github.com/DojoCodingLabs/remotion-superpowers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Category: Media](https://img.shields.io/badge/Category-Media-purple)](https://github.com/topics/claude-code-plugin)
+[![MCP Servers: 5](https://img.shields.io/badge/MCP_Servers-5-orange)](https://github.com/DojoCodingLabs/remotion-superpowers)
+[![Free & Open Source](https://img.shields.io/badge/Free-Open_Source-brightgreen)](https://github.com/DojoCodingLabs/remotion-superpowers)
+
+### A free, open-source Claude Code plugin that turns Remotion into a full video production studio — by [Dojo Coding](https://dojocoding.io)
+
 A Claude Code plugin that turns Remotion from a motion graphics tool into a **full video production studio**.
 
 Gives Claude the power to **see** (video analysis), **hear** (music generation), **speak** (voiceovers), **source** (stock footage + AI generation), **caption** (TikTok-style), **transition** (professional scene cuts), and **review** (AI feedback loop) — all wired into Remotion’s React-based video pipeline.
@@ -211,6 +219,10 @@ remotion-superpowers/
 - [CodeSensei](https://github.com/DojoCodingLabs/code-sensei) — Learn to code while you vibecode
 - [juan-workflow](https://github.com/DojoCodingLabs/juan-workflow) — Dev lifecycle guardrails
 - [VibeCoding Bootcamp](https://dojocoding.io) — Structured curriculum with live mentors
+
+## Contributing
+
+Remotion Superpowers is open source and built to be contributed to. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
