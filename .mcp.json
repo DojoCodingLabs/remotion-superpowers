@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "remotion-media": {
+      "command": "npx",
+      "args": ["remotion-media-mcp"],
+      "env": {
+        "KIE_API_KEY": "${KIE_API_KEY}"
+      }
+    },
+    "ElevenLabs": {
+      "command": "uvx",
+      "args": ["elevenlabs-mcp"],
+      "env": {
+        "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}",
+        "ELEVENLABS_MCP_BASE_PATH": "./public/audio",
+        "ELEVENLABS_MCP_OUTPUT_MODE": "files"
+      }
+    },
+    "TwelveLabs": {
+      "command": "npx",
+      "args": ["-y", "twelvelabs-mcp"],
+      "env": {
+        "TWELVELABS_API_KEY": "${TWELVELABS_API_KEY}"
+      }
+    },
+    "Pexels": {
+      "command": "uvx",
+      "args": ["pexels-mcp-server"],
+      "env": {
+        "PEXELS_API_KEY": "${PEXELS_API_KEY}"
+      }
+    }
+  }
+}

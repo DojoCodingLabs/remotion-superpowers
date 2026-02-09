@@ -1,0 +1,38 @@
+{
+  "hooks": [
+    {
+      "event": "on_tool_call",
+      "description": "Check if required MCP servers are available before media generation commands",
+      "matcher": {
+        "tool_names": [
+          "generate_tts",
+          "generate_music",
+          "generate_sfx",
+          "generate_image",
+          "generate_video",
+          "generate_subtitles",
+          "list_assets"
+        ]
+      },
+      "action": {
+        "type": "pre_check",
+        "message": "Checking remotion-media MCP server... If this fails, run /setup to configure your KIE_API_KEY."
+      }
+    },
+    {
+      "event": "on_tool_call",
+      "description": "Remind about Pexels attribution when using stock footage",
+      "matcher": {
+        "tool_names": [
+          "searchPhotos",
+          "searchVideos",
+          "downloadVideo"
+        ]
+      },
+      "action": {
+        "type": "post_note",
+        "message": "Remember: Pexels content is free but attribution is appreciated. Consider adding 'Media by Pexels' to your video credits."
+      }
+    }
+  ]
+}
