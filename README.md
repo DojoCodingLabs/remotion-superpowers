@@ -1,4 +1,4 @@
-# 🎬 Remotion Superpowers v2.0
+# 🎬 Remotion Superpowers v2.1
 
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blue?logo=anthropic&logoColor=white)](https://github.com/DojoCodingLabs/remotion-superpowers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -171,7 +171,7 @@ Your Prompt → /create-video (or /create-short)
 
 ```
 remotion-superpowers/
-├── .claude-plugin/plugin.json    # Plugin metadata (v2.0.0)
+├── .claude-plugin/plugin.json    # Plugin metadata (v2.1.0)
 ├── .mcp.json                     # 5 MCP server configurations
 ├── commands/                     # 13 slash commands
 │   ├── setup.md                  # /setup
@@ -191,13 +191,24 @@ remotion-superpowers/
 │   ├── video-director.md         # Orchestrates full pipeline
 │   ├── media-scout.md            # Finds & evaluates media
 │   └── post-producer.md          # Reviews & iterates on quality
-├── skills/                       # Domain knowledge (12 rules)
+├── skills/                       # Domain knowledge (18 rules)
 │   ├── remotion-production/      # Full production workflow skill
 │   └── setup-guide/              # Setup & onboarding knowledge
-├── hooks/hooks.json              # Pre-tool MCP health checks
-├── scripts/setup-check.sh        # Dependency validation script
+├── hooks/hooks.json              # Pre/post-tool hooks (API key checks, tips)
+├── scripts/
+│   ├── setup-check.sh            # Dependency validation script
+│   ├── check-mcp-server.sh       # Pre-tool API key validation hook
+│   └── post-tool-note.sh         # Post-tool contextual tips hook
 └── README.md
 ```
+
+## v2.1 Changelog
+
+- **6 new production rules**: Replicate models, image generation, video generation, sound effects, ElevenLabs advanced, asset management
+- **Replicate MCP commands fixed**: `/generate-image` and `/generate-clip` now use Replicate MCP tools instead of direct curl API calls
+- **Hooks rewritten**: `hooks.json` converted to Anthropic spec format with shell script execution (PreToolUse/PostToolUse)
+- **Full spec compliance**: All components pass Anthropic plugin specification checks
+- **18 total production rules** covering all 5 MCP servers (~85% API coverage)
 
 ## v2.0 Changelog
 
