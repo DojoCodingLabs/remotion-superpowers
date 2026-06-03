@@ -3,29 +3,45 @@
     "PreToolUse": [
       {
         "matcher": "generate_tts|generate_music|generate_sfx|generate_image|generate_video|generate_subtitles|list_assets",
-        "type": "command",
-        "command": "sh scripts/check-mcp-server.sh remotion-media KIE_API_KEY",
-        "timeout": 5000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh scripts/check-mcp-server.sh remotion-media KIE_API_KEY",
+            "timeout": 5000
+          }
+        ]
       },
       {
         "matcher": "replicate_run|replicate_create_prediction",
-        "type": "command",
-        "command": "sh scripts/check-mcp-server.sh replicate REPLICATE_API_TOKEN",
-        "timeout": 5000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh scripts/check-mcp-server.sh replicate REPLICATE_API_TOKEN",
+            "timeout": 5000
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "searchPhotos|searchVideos|downloadVideo",
-        "type": "command",
-        "command": "sh scripts/post-tool-note.sh pexels-attribution",
-        "timeout": 3000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh scripts/post-tool-note.sh pexels-attribution",
+            "timeout": 3000
+          }
+        ]
       },
       {
         "matcher": "render",
-        "type": "command",
-        "command": "sh scripts/post-tool-note.sh captions-tip",
-        "timeout": 3000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh scripts/post-tool-note.sh captions-tip",
+            "timeout": 3000
+          }
+        ]
       }
     ]
   }
