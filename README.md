@@ -100,6 +100,7 @@ Or just describe what you want:
 | Command | Description |
 |---|---|
 | `/setup` | First-run wizard — installs everything you need |
+| `/studio-launcher` | Install a Linux desktop launcher to open Remotion Studio from the app grid |
 | `/create-video` | Full video production pipeline from concept to render |
 | `/create-short` | Short-form vertical video (TikTok, Reels, Shorts) — 9:16, captions, hooks |
 
@@ -173,8 +174,9 @@ Your Prompt → /create-video (or /create-short)
 remotion-superpowers/
 ├── .claude-plugin/plugin.json    # Plugin metadata (v2.1.0)
 ├── .mcp.json                     # 5 MCP server configurations
-├── commands/                     # 13 slash commands
+├── commands/                     # 14 slash commands
 │   ├── setup.md                  # /setup
+│   ├── studio-launcher.md        # /studio-launcher (Linux desktop entry)
 │   ├── create-video.md           # /create-video
 │   ├── create-short.md           # /create-short (TikTok/Reels/Shorts)
 │   ├── find-footage.md           # /find-footage
@@ -197,6 +199,7 @@ remotion-superpowers/
 ├── hooks/hooks.json              # Pre/post-tool hooks (API key checks, tips)
 ├── scripts/
 │   ├── setup-check.sh            # Dependency validation script
+│   ├── install-studio-launcher.sh # Linux desktop launcher installer
 │   ├── check-mcp-server.sh       # Pre-tool API key validation hook
 │   └── post-tool-note.sh         # Post-tool contextual tips hook
 └── README.md

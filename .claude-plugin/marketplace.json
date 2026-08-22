@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "remotion-superpowers",
-      "description": "Full video production studio for Remotion. AI voiceovers (ElevenLabs), music (Suno), sound effects, stock footage (Pexels), AI image/video generation (Replicate), TikTok-style captions, 3D content, transitions, video analysis & review (TwelveLabs) — all wired into Remotion compositions. 13 slash commands, 3 agents, 5 MCP servers.",
+      "description": "Full video production studio for Remotion. AI voiceovers (ElevenLabs), music (Suno), sound effects, stock footage (Pexels), AI image/video generation (Replicate), TikTok-style captions, 3D content, transitions, video analysis & review (TwelveLabs) — all wired into Remotion compositions. 14 slash commands, 3 agents, 5 MCP servers.",
       "version": "2.1.0",
       "author": {
         "name": "Dojo Coding Labs",
