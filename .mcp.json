@@ -25,7 +25,7 @@
     },
     "Pexels": {
       "command": "uvx",
-      "args": ["pexels-mcp-server"],
+      "args": ["--with", "mcp[cli]<2", "pexels-mcp-server"],
       "env": {
         "PEXELS_API_KEY": "${PEXELS_API_KEY}"
       }
