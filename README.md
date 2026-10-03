@@ -1,16 +1,28 @@
-# 🎬 Remotion Superpowers v2.1
+<p align="center">
+  <a href="https://dojocoding.io">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner-light.svg">
+      <img alt="Remotion Superpowers by Dojo Coding: Turns Remotion into a full video studio" src="docs/assets/banner-light.svg" width="100%">
+    </picture>
+  </a>
+</p>
 
-[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blue?logo=anthropic&logoColor=white)](https://github.com/DojoCodingLabs/remotion-superpowers)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Category: Media](https://img.shields.io/badge/Category-Media-purple)](https://github.com/topics/claude-code-plugin)
-[![MCP Servers: 5](https://img.shields.io/badge/MCP_Servers-5-orange)](https://github.com/DojoCodingLabs/remotion-superpowers)
-[![Free & Open Source](https://img.shields.io/badge/Free-Open_Source-brightgreen)](https://github.com/DojoCodingLabs/remotion-superpowers)
+# Remotion Superpowers
 
-### A free, open-source Claude Code plugin that turns Remotion into a full video production studio — by [Dojo Coding](https://dojocoding.io)
+**A free, open-source Claude Code plugin for builders who make videos with Remotion.**
 
 A Claude Code plugin that turns Remotion from a motion graphics tool into a **full video production studio**.
 
 Gives Claude the power to **see** (video analysis), **hear** (music generation), **speak** (voiceovers), **source** (stock footage + AI generation), **caption** (TikTok-style), **transition** (professional scene cuts), and **review** (AI feedback loop) — all wired into Remotion’s React-based video pipeline.
+
+[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-201E3D?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-FF7151?labelColor=201E3D)](https://opensource.org/licenses/MIT)
+[![Category: Media](https://img.shields.io/badge/Category-Media-FF7151?labelColor=201E3D)](https://github.com/topics/claude-code-plugin)
+[![MCP Servers: 5](https://img.shields.io/badge/MCP%20Servers-5-FF7151?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
+[![Free & Open Source](https://img.shields.io/badge/Free-Open%20Source-FF7151?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
+
+[Get started](#installation) · [Commands](#commands) · [API keys](#api-keys-required) · [Contribute](CONTRIBUTING.md) · [Report an issue](https://github.com/DojoCodingLabs/remotion-superpowers/issues/new)
 
 ## What This Plugin Does
 
@@ -96,34 +108,34 @@ Or just describe what you want:
 
 ## Commands
 
-### 🎬 Production
+### Production
 | Command | Description |
 |---|---|
 | `/setup` | First-run wizard — installs everything you need |
 | `/create-video` | Full video production pipeline from concept to render |
 | `/create-short` | Short-form vertical video (TikTok, Reels, Shorts) — 9:16, captions, hooks |
 
-### 🎨 Assets
+### Assets
 | Command | Description |
 |---|---|
 | `/find-footage` | Search & download stock footage from Pexels |
 | `/generate-image` | Generate AI images (backgrounds, thumbnails, art) |
 | `/generate-clip` | Generate AI video clips (text-to-video, image-to-video) |
 
-### 🔊 Audio
+### Audio
 | Command | Description |
 |---|---|
 | `/add-voiceover` | Generate and add narration to your video |
 | `/add-music` | Generate and add background music |
 | `/transcribe` | Transcribe audio/video to text with timestamps |
 
-### ✨ Enhancements
+### Enhancements
 | Command | Description |
 |---|---|
 | `/add-captions` | TikTok-style animated word-by-word captions |
 | `/add-transitions` | Professional scene transitions (fade, slide, wipe, flip) |
 
-### 👁️ Analysis
+### Analysis
 | Command | Description |
 |---|---|
 | `/analyze-footage` | Use AI to understand existing video files |
@@ -237,10 +249,8 @@ Remotion Superpowers is open source and built to be contributed to. See [CONTRIB
 
 ## License
 
-MIT License — free to use, modify, and distribute.
+MIT License — free to use, modify, and distribute. Built by [Dojo Coding](https://dojocoding.io).
 
----
-
-🎬 From prompt to production — one `/create-video` at a time.
-
-Free. Open source. By [Dojo Coding Labs](https://dojocoding.io).
+<p align="center">
+  <a href="https://dojocoding.io"><img src="docs/assets/dojocoding-mark.png" alt="Dojo Coding" width="48"></a>
+</p>
