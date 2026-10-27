@@ -50,6 +50,16 @@ claude
 - **Command refinements** -- better prompts, more options
 - **Documentation** -- tutorials, video walkthroughs, examples
 
+### Before Opening a PR
+
+Run the same checks CI runs:
+
+```bash
+bash scripts/ci/validate.sh
+```
+
+It checks that JSON files parse, `claude plugin validate .` passes, shell scripts pass `shellcheck`, docs don't reference old MCP tool names, every `skills/*/SKILL.md` has valid frontmatter, and the hook scripts behave. You'll need `jq`, `python3` and `shellcheck`; the plugin check is skipped locally if `claude` isn't installed.
+
 ### PR Guidelines
 
 1. Keep it focused -- one feature or fix per PR
