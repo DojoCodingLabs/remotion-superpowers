@@ -1,0 +1,89 @@
+name: Bug report
+description: Something in Remotion Superpowers is broken or doesn't work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please check existing issues first: many reports turn out to be duplicates of a bug that's already fixed or being worked on.
+
+  - type: checkboxes
+    id: searched
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched existing issues (open and closed)
+          required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      description: Shown in `/plugin`, or the `version` in `.claude-plugin/plugin.json`.
+      placeholder: "2.1.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Agent
+      options:
+        - Claude Code
+        - Codex
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: agent-version
+    attributes:
+      label: Agent version
+      description: For Claude Code, the output of `claude --version`.
+      placeholder: "2.1.0 (Claude Code)"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "macOS 15.1, Ubuntu 24.04, Windows 11 + WSL"
+    validations:
+      required: true
+
+  - type: input
+    id: component
+    attributes:
+      label: MCP server or command
+      description: Which MCP server, command, skill or hook is involved?
+      placeholder: "remotion-media / Pexels / /add-voiceover / plugin install"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `/plugin install remotion-superpowers`
+        2. Run `/create-video`
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-actual
+    attributes:
+      label: Expected vs actual
+      description: What did you expect to happen, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Paste error output here. If the plugin fails to load or install, this is where the `/plugin` error output goes. Remove any API keys before posting.
+      render: shell

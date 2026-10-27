@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and community help
+    url: https://dojocoding.io/discord
+    about: Ask setup and usage questions on the Dojo Coding Discord.

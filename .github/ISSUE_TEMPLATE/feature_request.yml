@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a new command, MCP integration, production rule or improvement.
+labels: [enhancement]
+body:
+  - type: checkboxes
+    id: searched
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched existing issues (open and closed)
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like it to work? Commands, tools or workflows you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you use now, or other approaches you thought about.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Example videos, links, screenshots.
