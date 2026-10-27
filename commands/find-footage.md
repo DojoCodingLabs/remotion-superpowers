@@ -24,7 +24,7 @@ Ask the user what they're looking for if not already clear. Get:
 Craft a descriptive search query and run:
 
 ```
-Use Pexels searchVideos:
+Use Pexels videos_search:
 - query: [descriptive keywords — be specific]
 - orientation: [landscape/portrait/square]
 - size: large
@@ -33,7 +33,7 @@ Use Pexels searchVideos:
 
 For photos:
 ```
-Use Pexels searchPhotos:
+Use Pexels photos_search:
 - query: [descriptive keywords]
 - orientation: [landscape/portrait/square]
 - size: large

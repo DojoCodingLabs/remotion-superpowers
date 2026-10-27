@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "generate_tts|generate_music|generate_sfx|generate_image|generate_video|generate_subtitles|list_assets",
+        "matcher": "^mcp__(plugin_remotion-superpowers_)?remotion-media__generate_(image|video_from_text|video_from_image|sound_effect|music|speech)$",
         "hooks": [
           {
             "type": "command",
@@ -10,21 +10,11 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "replicate_run|replicate_create_prediction",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/check-mcp-server.sh\" replicate REPLICATE_API_TOKEN",
-            "timeout": 5
-          }
-        ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "searchPhotos|searchVideos|downloadVideo",
+        "matcher": "^mcp__(plugin_remotion-superpowers_)?Pexels__(photos_search|videos_search|photo_get|video_get)$",
         "hooks": [
           {
             "type": "command",
@@ -34,7 +24,7 @@
         ]
       },
       {
-        "matcher": "render",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",

@@ -7,8 +7,10 @@ Use `remotion-media`'s `generate_music` tool:
 ```
 generate_music:
   prompt: "upbeat electronic background music, energetic, no vocals, corporate tech vibe"
-  project_path: "/path/to/remotion/project"
+  output_name: "music-background"
 ```
+
+The file lands in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 ### Prompt Tips for Better Music
 

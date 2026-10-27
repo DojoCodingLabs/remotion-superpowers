@@ -6,14 +6,14 @@ Remotion projects accumulate many generated assets — audio, video, images, cap
 
 ## Checking Existing Assets
 
-Use remotion-media's `list_assets` tool to see all generated media:
+Use remotion-media's `list_assets` tool to browse the asset library (requires `AIRTABLE_API_KEY`):
 
 ```
 list_assets:
-  project_path: "/path/to/remotion/project"
+  file_type: "audio"  # optional: image, video, audio, subtitle, other
 ```
 
-This returns a list of all assets in the project's `public/` directory with filenames, types, and sizes.
+This returns assets backed up to the library with AID, filename, description, file type, and creation date. It does not scan `public/`; use `ls -R public/` for that.
 
 ## File Organization Standard
 
@@ -114,7 +114,7 @@ The path inside `staticFile()` is relative to the `public/` directory. No leadin
 
 Before rendering, verify all assets are accounted for:
 
-1. **List all assets**: Use `list_assets` to see what's in `public/`
+1. **List all assets**: Run `ls -R public/` to see what's in `public/`
 2. **Check references**: Search your Remotion source for `staticFile(` calls
 3. **Find orphans**: Assets in `public/` not referenced in code (safe to remove)
 4. **Find missing**: `staticFile()` calls pointing to files that don't exist (will break render)
@@ -129,7 +129,7 @@ grep -r "staticFile(" src/ --include="*.tsx" --include="*.ts"
 1. **Organize from the start** — create `audio/`, `footage/`, `images/`, `captions/` subdirectories immediately
 2. **Use descriptive names** — your future self (and Claude) will thank you
 3. **Never put assets in `src/`** — only `public/` works with `staticFile()`
-4. **Run `list_assets` before rendering** — catch missing files early
+4. **Run `ls -R public/` before rendering** — catch missing files early
 5. **Delete unused assets** — keeps project size manageable for rendering
 6. **Keep original and processed separate** — if you edit an audio file, save as a new name
 7. **Match naming to code** — if your component is `IntroScene`, name assets `intro-*`

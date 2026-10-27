@@ -5,11 +5,11 @@
 Use the Pexels MCP to find stock footage:
 
 ```
-searchVideos:
+videos_search:
   query: "drone footage city skyline sunset"
   orientation: "landscape"
   size: "large"
-  per_page: 5
+  per_page: "5"
 ```
 
 ### Search Tips

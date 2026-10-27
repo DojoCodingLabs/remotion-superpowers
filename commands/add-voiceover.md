@@ -21,7 +21,7 @@ If the user hasn't provided a script:
 
 ### 2. Choose Voice
 
-Available voices (via remotion-media TTS):
+Available voices (via remotion-media generate_speech):
 - **Eric** — Warm, professional male (default)
 - **Rachel** — Clear, engaging female
 - **Aria** — Energetic female
@@ -35,11 +35,12 @@ For voice cloning or custom voices, use the dedicated ElevenLabs MCP (requires `
 ### 3. Generate TTS
 
 ```
-Use remotion-media generate_tts:
+Use remotion-media generate_speech:
 - text: [the approved script]
+- output_name: narration-intro
 - voice: [chosen voice]
-- project_path: [project root path]
 ```
+Files land in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 Record the returned **file path** and **duration**.
 
@@ -69,8 +70,7 @@ Offer to generate subtitles:
 
 ```
 Use remotion-media generate_subtitles:
-- input: [voiceover file path]
-- project_path: [project root path]
+- input_file: [voiceover filename inside public/, e.g. narration-intro.mp3]
 ```
 
 ### 7. Duck Background Music (if present)

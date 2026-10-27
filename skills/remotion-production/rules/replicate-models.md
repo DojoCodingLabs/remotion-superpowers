@@ -81,8 +81,8 @@ replicate_create_prediction:
 |---|---|---|
 | Quick image generation | remotion-media `generate_image` | Simpler, auto-saves to project |
 | Specific model needed (FLUX, Imagen) | Replicate MCP | Model selection control |
-| Quick video clip | remotion-media `generate_video` | Simpler, uses Veo 3.1 |
-| Image-to-video animation | Replicate MCP (Kling, Wan I2V) | KIE doesn't support I2V |
+| Quick video clip | remotion-media `generate_video_from_text` | Simpler, uses Veo 3.1 |
+| Image-to-video animation | remotion-media `generate_video_from_image` or Replicate MCP (Kling, Wan I2V) | Replicate for model choice |
 | Fast draft video | Replicate MCP (Wan 2.5 Fast) | Faster than Veo for drafts |
 | Text-in-image or logos | Replicate MCP (Ideogram v3) | Specialized for typography |
 | Style transfer | Replicate MCP (FLUX Kontext) | Multi-reference support |

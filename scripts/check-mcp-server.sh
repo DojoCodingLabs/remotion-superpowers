@@ -1,13 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 # Remotion Superpowers — Pre-tool MCP server check hook
 # Called by Claude Code before MCP tool execution.
 #
 # Usage: sh scripts/check-mcp-server.sh <server-name> <env-var-name>
-# Receives hook JSON on stdin. Outputs JSON decision on stdout.
+# Receives hook JSON on stdin.
 #
 # Exit codes:
 #   0 = success (approve tool call)
-#   2 = blocking error (prevent tool call, show reason)
+#   2 = blocking error (prevent tool call; stderr is shown to Claude)
 
 SERVER_NAME="${1:-unknown}"
 ENV_VAR="${2:-UNKNOWN_KEY}"
@@ -22,7 +22,7 @@ if [ -n "$ENV_VALUE" ]; then
   # Env var is set — approve the tool call
   exit 0
 else
-  # Env var is missing — block with helpful message
-  echo "{\"decision\": \"block\", \"reason\": \"$ENV_VAR is not set. The $SERVER_NAME MCP server needs this key. Run /setup to configure your API keys.\"}"
+  # Env var is missing — block with helpful message (Claude Code reads stderr on exit 2)
+  echo "$ENV_VAR is not set. The $SERVER_NAME MCP server needs this key. Run /setup to configure your API keys." >&2
   exit 2
 fi

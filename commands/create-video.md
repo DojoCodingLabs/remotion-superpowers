@@ -55,27 +55,28 @@ Do this FIRST — audio determines timing.
 #### 2a. Voiceover (if needed)
 Write the narration script, then generate:
 ```
-Use remotion-media generate_tts:
+Use remotion-media generate_speech:
 - text: [full narration script]
+- output_name: narration-intro
 - voice: [chosen voice name]
-- project_path: [project root path]
 ```
+Files land in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 **Record the returned duration — this sets the video length.**
 
 #### 2b. Background Music
 ```
 Use remotion-media generate_music:
 - prompt: [music description, always include "no vocals"]
-- project_path: [project root path]
+- output_name: music-background
 ```
 
 #### 2c. Sound Effects (if needed)
 For each SFX:
 ```
-Use remotion-media generate_sfx:
-- text: [sound description]
+Use remotion-media generate_sound_effect:
+- prompt: [sound description]
+- output_name: sfx-whoosh
 - duration_seconds: [length]
-- project_path: [project root path]
 ```
 
 ### Phase 3: Source Visual Assets
@@ -83,7 +84,7 @@ Use remotion-media generate_sfx:
 #### 3a. Stock Footage (Pexels)
 For each scene needing stock footage:
 ```
-Use Pexels searchVideos:
+Use Pexels videos_search:
 - query: [descriptive keywords]
 - orientation: landscape
 - size: large
@@ -103,7 +104,7 @@ Use TwelveLabs to:
 ```
 Use remotion-media generate_image:
 - prompt: [image description]
-- project_path: [project root path]
+- output_name: image-scene1
 ```
 
 ### Phase 4: Build the Remotion Composition

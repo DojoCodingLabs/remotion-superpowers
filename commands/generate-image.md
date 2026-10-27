@@ -38,10 +38,10 @@ Write a detailed image generation prompt. Good prompts include:
 ```
 Use remotion-media generate_image:
 - prompt: [crafted prompt]
-- project_path: [project root path]
+- output_name: image-hero
 ```
 
-The image is saved to the project's `public/` directory.
+The image is saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 ### 4. Generate via Replicate MCP (if available)
 

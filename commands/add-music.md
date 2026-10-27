@@ -26,8 +26,9 @@ Craft a descriptive prompt and generate:
 ```
 Use remotion-media generate_music:
 - prompt: "[genre] background music, [mood], [tempo], no vocals, [additional descriptors]"
-- project_path: [project root path]
+- output_name: music-background
 ```
+Files land in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 **Good prompt examples:**
 - "upbeat electronic background music, energetic, no vocals, modern tech startup vibe"

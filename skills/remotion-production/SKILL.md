@@ -12,13 +12,14 @@ This skill teaches how to produce complete videos with Remotion by orchestrating
 You have access to these MCP servers for media production:
 
 ### remotion-media (via KIE)
-- `generate_tts` — Text-to-speech voiceovers (ElevenLabs TTS)
+- `generate_speech` — Text-to-speech voiceovers (ElevenLabs TTS)
 - `generate_music` — Background music (Suno V3.5–V5)
-- `generate_sfx` — Sound effects (ElevenLabs SFX V2)
+- `generate_sound_effect` — Sound effects (ElevenLabs SFX V2)
 - `generate_image` — AI images (Nano Banana Pro)
-- `generate_video` — AI video clips (Veo 3.1)
+- `generate_video_from_text` — AI video clips from a prompt (Veo 3.1)
+- `generate_video_from_image` — Animate 1 image, or transition between 2 (Veo 3.1)
 - `generate_subtitles` — Transcribe audio/video to SRT (Whisper)
-- `list_assets` — List all generated media in the project
+- `list_assets` — Browse the Airtable asset library (requires `AIRTABLE_API_KEY`)
 
 ### TwelveLabs (video understanding)
 - Index and analyze video files
@@ -27,10 +28,10 @@ You have access to these MCP servers for media production:
 - Video summarization
 
 ### Pexels (stock footage)
-- `searchPhotos` — Search free stock photos
-- `searchVideos` — Search free stock videos
-- `getVideo` / `getPhoto` — Get details by ID
-- `downloadVideo` — Download video to project
+- `photos_search` — Search free stock photos
+- `videos_search` — Search free stock videos
+- `video_get` / `photo_get` — Get details by ID
+- No download tool — take the file URL from `video_get` (or the search result's `video_files`) and `curl` it into `public/footage/`
 
 ### ElevenLabs (optional — advanced voice)
 - Voice cloning from audio samples
