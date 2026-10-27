@@ -52,7 +52,7 @@ Use remotion-media generate_speech:
 - output_name: voiceover-short
 - voice: [energetic voice like Aria or Charlie for shorts]
 ```
-Files land in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
+Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
 #### 2b. Background Music
 ```

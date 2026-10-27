@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.0
+
+### Added
+- **Codex support.** `codex plugin marketplace add DojoCodingLabs/remotion-superpowers`, then `codex plugin add remotion-superpowers@remotion-superpowers` (`.codex-plugin/plugin.json`).
+- **Gemini CLI support.** `gemini extensions install https://github.com/DojoCodingLabs/remotion-superpowers` (`gemini-extension.json`). Gemini prompts for the API keys on install.
+- **Any Agent Skills agent** (Cursor, Copilot, …): `npx skills add DojoCodingLabs/remotion-superpowers`.
+- CI check that all manifests share one version and Gemini mirrors `.mcp.json`.
+
+### Changed
+- The 13 commands are now Agent Skills (`skills/<name>/SKILL.md`). In Claude Code they're still the same slash commands.
+- `.mcp.json` forwards API keys with `env_vars` instead of `"${VAR}"` strings. Codex passed those strings through literally, so every server got `${KIE_API_KEY}` as its key; Claude Code still inherits them from your shell.
+- Skill text no longer assumes Claude Code (launch directory, restart and skill-location notes).
+
 ## 2.1.1
 
 ### Fixed

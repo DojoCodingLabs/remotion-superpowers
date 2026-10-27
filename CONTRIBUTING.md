@@ -14,7 +14,7 @@ The `skills/remotion-production/rules/` directory contains 12 production guides.
 - CI/CD rendering, production pipeline
 
 ### Add Command Improvements
-The `commands/` directory contains 13 slash commands. If you find a better prompt flow or want to add edge case handling, contributions are welcome.
+The workflow skills (`skills/create-video/`, `skills/add-music/`, …) are the plugin's 13 slash commands in Claude Code and plain Agent Skills everywhere else. Keep them agent-neutral: no Claude-only syntax in the body. If you find a better prompt flow or want to add edge case handling, contributions are welcome.
 
 ## Code Contributions
 

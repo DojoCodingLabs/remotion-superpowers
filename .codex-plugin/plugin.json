@@ -1,0 +1,51 @@
+{
+  "name": "remotion-superpowers",
+  "version": "2.2.0",
+  "description": "Full video production pipeline for Remotion — gives Claude eyes (video analysis), voice (TTS/voiceover), ears (music/SFX), stock footage, AI image/video generation, TikTok captions, 3D content, and more. By Dojo Coding Labs.",
+  "author": {
+    "name": "Dojo Coding Labs",
+    "url": "https://dojocoding.io"
+  },
+  "homepage": "https://github.com/DojoCodingLabs/remotion-superpowers",
+  "repository": "https://github.com/DojoCodingLabs/remotion-superpowers",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "claude",
+    "anthropic",
+    "remotion",
+    "video-production",
+    "text-to-speech",
+    "music-generation",
+    "stock-footage",
+    "video-analysis",
+    "captions",
+    "tiktok",
+    "shorts",
+    "reels",
+    "ai-video",
+    "ai-image",
+    "3d",
+    "transitions",
+    "elevenlabs",
+    "suno",
+    "pexels",
+    "twelvelabs",
+    "replicate",
+    "mcp",
+    "vibecoding",
+    "dojo-coding"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Remotion Superpowers",
+    "shortDescription": "Full video production studio for Remotion: voiceovers, music, stock footage, AI image/video, captions and AI review.",
+    "developerName": "Dojo Coding Labs",
+    "category": "Media",
+    "websiteURL": "https://github.com/DojoCodingLabs/remotion-superpowers",
+    "defaultPrompt": "Create a 30-second product demo video for a todo app",
+    "brandColor": "#0B5FFF"
+  }
+}

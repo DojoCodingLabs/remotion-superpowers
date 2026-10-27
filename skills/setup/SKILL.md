@@ -43,14 +43,16 @@ Do NOT proceed until the user is in a Remotion project directory.
 
 ## Step 3: Install Remotion Agent Skills
 
-Check if `.claude/skills/remotion-best-practices/` exists.
+Check if a `remotion-best-practices` skill is already installed (for example in `.claude/skills/`, `.agents/skills/`, `.codex/skills/` or `.gemini/skills/`).
 
 **If not installed:**
 ```bash
 npx skills add remotion-dev/skills
 ```
 
-Tell the user: "Remotion best practices skills installed. Claude now knows Remotion's APIs, animation patterns, audio handling, and more."
+`npx skills` detects the installed agents (Claude Code, Codex, Gemini CLI, Cursor, Copilot…) and installs to each.
+
+Tell the user: "Remotion best practices skills installed. Your agent now knows Remotion's APIs, animation patterns, audio handling, and more."
 
 ## Step 4: Configure API Keys
 
@@ -61,6 +63,8 @@ Walk the user through each API key. For each one:
 4. Ask them to set it: `export VAR_NAME=their-key`
 5. Recommend adding to `~/.zshrc` or `~/.bashrc` for persistence
 
+**Gemini CLI:** extensions don't inherit the shell environment. The keys are prompted for when the extension is installed; to change one later, run `gemini extensions config remotion-superpowers "KIE API key"` (or the matching setting name) instead of exporting it.
+
 ### 4a. KIE API Key (PRIMARY — covers Suno + ElevenLabs + more)
 - **What:** Single API key that provides music generation (Suno), sound effects (ElevenLabs SFX), text-to-speech (ElevenLabs TTS), image generation, video generation, and subtitle generation.
 - **Signup:** https://kie.ai — create account, get API key from dashboard
@@ -69,7 +73,7 @@ Walk the user through each API key. For each one:
 - **Persistence:** `echo 'export KIE_API_KEY=your-key-here' >> ~/.zshrc`
 
 ### 4b. TwelveLabs API Key (VIDEO UNDERSTANDING — "eyes")
-- **What:** Gives Claude the ability to "see" video files — analyze footage, find specific scenes, detect objects and speakers, generate summaries. This is how the plugin understands existing video in your project folders.
+- **What:** Gives your agent the ability to "see" video files — analyze footage, find specific scenes, detect objects and speakers, generate summaries. This is how the plugin understands existing video in your project folders.
 - **Signup:** https://www.twelvelabs.io — create account, get API key from dashboard
 - **Variable:** `TWELVELABS_API_KEY`
 - **Command:** `export TWELVELABS_API_KEY=your-key-here`
@@ -127,14 +131,14 @@ All configured servers should show as connected. If any fail:
 - Check that the API key environment variable is set
 - For `uvx`-based servers, ensure `uv` is installed
 - For `npx`-based servers, ensure Node.js is installed
-- Try restarting Claude Code
+- Try restarting your agent (Claude Code, Codex, Gemini CLI…)
 
 ## Step 7: Setup Complete
 
 Print a summary:
 
 ```
-🎬 Remotion Superpowers v2.0 — Setup Complete!
+🎬 Remotion Superpowers — Setup Complete!
 
 ✓ Dependencies verified
 ✓ Remotion project detected

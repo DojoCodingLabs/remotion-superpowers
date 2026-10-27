@@ -47,7 +47,7 @@ Use remotion-media generate_video_from_image:
 - output_name: clip-animated-still
 ```
 
-The clip is saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
+The clip is saved to `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
 ### 4. Generate via Replicate MCP (if available)
 

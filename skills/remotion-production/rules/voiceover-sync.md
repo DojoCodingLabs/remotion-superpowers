@@ -12,7 +12,7 @@ generate_speech:
 ```
 
 The tool returns:
-- File path (saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root)
+- File path (saved to `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root)
 - Duration in seconds
 
 ## Voice Selection Guide

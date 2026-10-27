@@ -175,6 +175,46 @@ else
   fail "post-tool-note.sh captions-tip: expected JSON with hookSpecificOutput.additionalContext, got '${out}'"
 fi
 
+# --- 7. Cross-agent manifests stay in sync ---------------------------------
+# Claude Code, Codex and Gemini CLI each have a manifest; versions must match,
+# and gemini-extension.json must run the same MCP servers as .mcp.json.
+section "Cross-agent manifests in sync"
+if err=$(python3 - <<'PY' 2>&1
+import json, sys
+claude = json.load(open(".claude-plugin/plugin.json"))
+market = json.load(open(".claude-plugin/marketplace.json"))
+codex = json.load(open(".codex-plugin/plugin.json"))
+gemini = json.load(open("gemini-extension.json"))
+mcp = json.load(open(".mcp.json"))["mcpServers"]
+errors = []
+versions = {
+    ".claude-plugin/plugin.json": claude["version"],
+    ".claude-plugin/marketplace.json": market["version"],
+    ".claude-plugin/marketplace.json plugins[0]": market["plugins"][0]["version"],
+    ".codex-plugin/plugin.json": codex["version"],
+    "gemini-extension.json": gemini["version"],
+}
+if len(set(versions.values())) != 1:
+    errors.append("versions differ: " + ", ".join("%s=%s" % kv for kv in versions.items()))
+gem = gemini.get("mcpServers", {})
+if set(gem) != set(mcp):
+    errors.append("gemini-extension.json servers %s != .mcp.json servers %s" % (sorted(gem), sorted(mcp)))
+for name in set(gem) & set(mcp):
+    if (gem[name]["command"], gem[name]["args"]) != (mcp[name]["command"], mcp[name]["args"]):
+        errors.append("%s: command/args differ between gemini-extension.json and .mcp.json" % name)
+gem_keys = {s["envVar"] for s in gemini.get("settings", [])}
+mcp_keys = {k for s in mcp.values() for k in s.get("env_vars", [])}
+if gem_keys != mcp_keys:
+    errors.append("gemini settings envVars %s != .mcp.json env_vars %s" % (sorted(gem_keys), sorted(mcp_keys)))
+if errors:
+    sys.exit("; ".join(errors))
+PY
+); then
+  pass "versions match and Gemini mirrors .mcp.json"
+else
+  fail "$err"
+fi
+
 # --- Summary ---------------------------------------------------------------
 echo ""
 if [ "$FAILURES" -eq 0 ]; then

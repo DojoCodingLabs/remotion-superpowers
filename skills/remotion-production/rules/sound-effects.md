@@ -12,7 +12,7 @@ generate_sound_effect:
   output_name: "sfx-whoosh"
 ```
 
-The SFX file is saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
+The SFX file is saved to `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
 ## Prompt Engineering by Category
 

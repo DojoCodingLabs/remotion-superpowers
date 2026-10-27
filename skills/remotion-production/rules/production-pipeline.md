@@ -28,7 +28,7 @@ Use remotion-media's generate_speech tool:
 - voice: choose appropriate voice (default: "Eric" for male, "Rachel" for female)
 ```
 
-The tool saves the audio to `public/` of the directory Claude Code was launched from (so start Claude Code from the Remotion project root) and returns the file path and duration.
+The tool saves the audio to `public/` of the directory your agent was launched from (so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root) and returns the file path and duration.
 
 **Record the duration** — this determines the composition length.
 

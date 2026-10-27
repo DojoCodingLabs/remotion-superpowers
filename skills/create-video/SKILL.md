@@ -60,7 +60,7 @@ Use remotion-media generate_speech:
 - output_name: narration-intro
 - voice: [chosen voice name]
 ```
-Files land in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
+Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 **Record the returned duration — this sets the video length.**
 
 #### 2b. Background Music
