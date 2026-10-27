@@ -2,20 +2,25 @@
 
 ## Generating Music
 
-Use `remotion-media`'s `generate_music` tool:
+Music comes from Eleven Music (`music_v2_5`), following the official ElevenLabs `music` skill, through the generation script in `audio-integration.md`. Add one entry per track to its `music` list:
 
-```
-generate_music:
-  prompt: "upbeat electronic background music, energetic, no vocals, corporate tech vibe"
-  output_name: "music-bg"
-  instrumental: true
+```ts
+const music = [
+  { name: "music-bg", prompt: "upbeat electronic background music, energetic, corporate tech vibe", lengthMs: 30_000 },
+];
 ```
 
-The file lands in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+The script passes `forceInstrumental: true`, so background tracks have no vocals. Set `lengthMs` to the video length (3 s to 10 min) once the voiceover is measured, rounded up a few seconds so the fade-out has room. The file lands at `public/music-bg.mp3`.
+
+- The Music API needs a paid ElevenLabs plan. Eleven Music is cleared for commercial use on paid plans.
+- Prompts can't name artists, bands or copyrighted lyrics. A `bad_prompt` error comes with a suggested rewording; use it.
+- For section-by-section control (quiet intro, build, drop), use a composition plan as the official skill shows, instead of several separate tracks.
+
+**Alternatives:** the deprecated ElevenLabs MCP `compose_music` (interactive one-offs; it only offers `music_v1`/`music_v2`, so rename its output to `music-bg.mp3`), or KIE `generate_music` for drafts (`prompt`, `output_name: "music-bg"`, `instrumental: true`). Suno and the other KIE-resold models aren't licensed by their owners through KIE. Use KIE audio for drafts and internal work, and generate final commercial audio with ElevenLabs.
 
 ### Prompt Tips for Better Music
 
-- Always set `instrumental: true` and say **"no vocals"** for background music (unless you want singing)
+- Keep `forceInstrumental: true` for background music (set it to `false` only if you want singing)
 - Include the **mood**: upbeat, calm, dramatic, inspiring, playful, cinematic
 - Include the **genre**: electronic, jazz, classical, lo-fi, ambient, rock, orchestral
 - Include the **use case**: "background music", "intro jingle", "outro music"
@@ -25,12 +30,12 @@ The file lands in `public/` of the directory your agent was launched from, so st
 
 | Video Type | Music Prompt |
 |---|---|
-| Tech product demo | "upbeat electronic background music, energetic, no vocals, modern tech startup vibe" |
-| Explainer video | "light acoustic background music, friendly and warm, no vocals, educational feel" |
-| Cinematic promo | "epic cinematic orchestral music, building tension, dramatic, no vocals" |
-| Social media ad | "catchy pop-inspired background music, fun and energetic, no vocals, short and punchy" |
-| Corporate presentation | "professional ambient background music, calm and confident, no vocals, minimal" |
-| Travel/lifestyle | "chill lo-fi hip hop, relaxed vibes, no vocals, smooth and dreamy" |
+| Tech product demo | "upbeat electronic background music, energetic, modern tech startup vibe" |
+| Explainer video | "light acoustic background music, friendly and warm, educational feel" |
+| Cinematic promo | "epic cinematic orchestral music, building tension, dramatic" |
+| Social media ad | "catchy pop-inspired background music, fun and energetic, short and punchy" |
+| Corporate presentation | "professional ambient background music, calm and confident, minimal" |
+| Travel/lifestyle | "chill lo-fi hip hop, relaxed vibes, smooth and dreamy" |
 
 ## Timing Music to Video
 
@@ -65,11 +70,11 @@ When voiceover plays, drop music volume. See `audio-integration.md` for the duck
 
 ### Pattern 3: Different music for different scenes
 
-Generate one track per section (`music-intro`, `music-main`, `music-outro`) and give each `<Audio>` its own `from` and `durationInFrames` (e.g. intro 0–5s at 0.4, main 5–25s at 0.2, outro from 25s at 0.4). Fade each one in and out so the hand-offs don't click.
+Add one entry per section to the script's `music` list (`music-intro`, `music-main`, `music-outro`) and give each `<Audio>` its own `from` and `durationInFrames` (e.g. intro 0–5s at 0.4, main 5–25s at 0.2, outro from 25s at 0.4). Fade each one in and out so the hand-offs don't click.
 
 ### Pattern 4: Loop short music for long videos
 
-If the generated music is shorter than the video, add `loop` to `<Audio>` (official audio.md, "Looping"). The jump back to the start can be audible, so for long videos consider generating a longer track or two sections instead.
+If the track is shorter than the video, add `loop` to `<Audio>` (official audio.md, "Looping"). The jump back to the start can be audible, so for long videos regenerate with a longer `lengthMs` instead (up to 10 minutes).
 
 ## Volume Guidelines
 

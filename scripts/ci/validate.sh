@@ -69,10 +69,10 @@ else
 fi
 
 # --- 4. Stale tool names ---------------------------------------------------
-# Names that remotion-media-mcp 1.2.x and pexels-mcp-server don't expose.
+# Tool names the pinned MCP servers don't expose (or we've retired), and removed models.
 # \b treats '_' as a word character, so generate_video_from_text doesn't match.
 section "No stale MCP tool names in ${DOC_DIRS[*]:-(no doc dirs)}"
-STALE_RE='generate_(tts|sfx)\b|\bgenerate_video\b|project_path|searchPhotos|searchVideos|downloadVideo'
+STALE_RE='generate_(tts|sfx)\b|\bgenerate_video\b|project_path|searchPhotos|searchVideos|downloadVideo|generate_subtitles|replicate_(run|create_prediction|get_prediction|output_url)|\b(photos_search|videos_search|photo_get|video_get)\b|pegasus1\.2|create-index'
 if [ "${#DOC_DIRS[@]}" -gt 0 ]; then
   if hits=$(grep -rnE --include='*.md' "$STALE_RE" "${DOC_DIRS[@]}"); then
     printf '%s\n' "$hits"

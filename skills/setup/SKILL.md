@@ -19,13 +19,13 @@ which uvx 2>/dev/null || echo "uvx not found"
 ```
 
 **Required:**
-- Node.js >= 18 (needed for Remotion and MCP servers)
+- Node.js 22.18 or newer (needed for Remotion and MCP servers)
 - npm (comes with Node.js)
 
 **Recommended:**
-- Python 3 + `uv`/`uvx` (needed for ElevenLabs and Pexels MCP servers)
+- Python 3 + `uv`/`uvx` (only for the optional, deprecated ElevenLabs MCP server)
   - If missing, tell user: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- whisper-cpp (`brew install whisper-cpp`) or OpenAI Whisper (`pip install openai-whisper`), needed only for `generate_subtitles` (SRT). Word-level captions use the official `remotion-captions` flow instead.
+- Nothing extra for captions: word-level captions use the official `remotion-captions` flow (local Whisper via WebGPU), or ElevenLabs Scribe when there's no GPU.
 
 Report each as ✓ or ✗ with version.
 
@@ -77,6 +77,12 @@ This upgrades Remotion and its packages and also updates the project-local Remot
 npx skills update remotion-best-practices remotion-captions remotion-create remotion-docs remotion-interactivity remotion-maps remotion-markup remotion-multimedia remotion-render remotion-saas remotion-studio remotion-upgrade --yes
 ```
 
+**Also install the provider skills** this plugin builds on:
+```bash
+npx skills add elevenlabs/skills   # voice, sound effects, music, transcription
+npx skills add replicate/skills    # only if the user wants Replicate models
+```
+
 Tell the user: "Remotion's official skills are installed. Your agent now knows Remotion's current APIs, preview, captions and rendering; Remotion Superpowers adds media generation on top."
 
 ## Step 4: Configure API Keys
@@ -88,44 +94,42 @@ Walk the user through each API key. For each one:
 4. Ask them to set it: `export VAR_NAME=their-key`
 5. Recommend adding to `~/.zshrc` or `~/.bashrc` for persistence
 
-**Gemini CLI:** extensions don't inherit the shell environment. The keys are prompted for when the extension is installed; to change one later, run `gemini extensions config remotion-superpowers "KIE API key"` (or the matching setting name) instead of exporting it.
+**Gemini CLI:** extensions don't inherit the shell environment. The keys are prompted for when the extension is installed; to change one later, run `gemini extensions config remotion-superpowers "ElevenLabs API key"` (or the matching setting name) instead of exporting it.
 
-### 4a. KIE API Key (PRIMARY — covers Suno + ElevenLabs + more)
-- **What:** Single API key that provides music generation (Suno), sound effects (ElevenLabs SFX), text-to-speech (ElevenLabs TTS), image generation, video generation, and subtitle generation.
-- **Signup:** https://kie.ai — create account, get API key from dashboard
+### 4a. ElevenLabs API Key (REQUIRED: voice, sound effects, music)
+- **What:** Voiceovers, sound effects and music (Eleven Music, cleared for commercial use on paid plans), plus transcription for word-level captions when there's no GPU. Generated through the official ElevenLabs skills.
+- **Signup:** https://elevenlabs.io (free tier available; a paid plan is needed for commercial music). Or run `npx -y @elevenlabs/cli@latest onboard init`, which signs in and stores a key for the project.
+- **Variable:** `ELEVENLABS_API_KEY`
+- **Command:** `export ELEVENLABS_API_KEY=your-key-here`
+- **Persistence:** `echo 'export ELEVENLABS_API_KEY=your-key-here' >> ~/.zshrc`
+
+### 4b. KIE API Key (REQUIRED: AI images and clips)
+- **What:** AI image generation (Nano Banana Pro) and AI video clips (Veo 3.1) through the remotion-media server. It can also make cheap audio drafts, but KIE resells those models without their owners' licence, so final commercial audio should come from ElevenLabs.
+- **Signup:** https://kie.ai (create an account, get an API key from the dashboard)
 - **Variable:** `KIE_API_KEY`
 - **Command:** `export KIE_API_KEY=your-key-here`
 - **Persistence:** `echo 'export KIE_API_KEY=your-key-here' >> ~/.zshrc`
 
-### 4b. TwelveLabs API Key (VIDEO UNDERSTANDING — "eyes")
-- **What:** Gives your agent the ability to "see" video files — analyze footage, find specific scenes, detect objects and speakers, generate summaries. This is how the plugin understands existing video in your project folders.
-- **Signup:** https://www.twelvelabs.io — create account, get API key from dashboard
+### 4c. TwelveLabs API Key (REQUIRED: video understanding and AI review)
+- **What:** Lets your agent watch video: analyse footage, find moments, and review your rendered video with actionable fixes.
+- **Signup:** https://www.twelvelabs.io (free tier available)
 - **Variable:** `TWELVELABS_API_KEY`
 - **Command:** `export TWELVELABS_API_KEY=your-key-here`
 - **Persistence:** `echo 'export TWELVELABS_API_KEY=your-key-here' >> ~/.zshrc`
 
-### 4c. Pexels API Key (FREE STOCK FOOTAGE)
-- **What:** Free stock photos and videos. Search by keyword, download HD/4K clips directly into your project.
-- **Signup:** https://www.pexels.com/api/ — completely free, create account and get key instantly
+### 4d. Pexels API Key (RECOMMENDED: free stock footage)
+- **What:** Free stock photos and videos. Search by keyword and download HD/4K clips into your project.
+- **Signup:** https://www.pexels.com/api/ (free, instant)
 - **Variable:** `PEXELS_API_KEY`
 - **Command:** `export PEXELS_API_KEY=your-key-here`
 - **Persistence:** `echo 'export PEXELS_API_KEY=your-key-here' >> ~/.zshrc`
 
-### 4d. ElevenLabs API Key (OPTIONAL — advanced voice features)
-- **What:** Direct access to the full ElevenLabs platform — voice cloning, custom voices, advanced TTS controls, audio isolation. The basic TTS/SFX is already covered by KIE, but this gives you premium voice features.
-- **Signup:** https://elevenlabs.io — free tier with 10k credits/month
-- **Variable:** `ELEVENLABS_API_KEY`
-- **Command:** `export ELEVENLABS_API_KEY=your-key-here`
-- **Persistence:** `echo 'export ELEVENLABS_API_KEY=your-key-here' >> ~/.zshrc`
-- **Note:** This is optional. Skip if you don't need voice cloning or custom voices.
-
-### 4e. Replicate API Token (OPTIONAL — advanced AI image/video models)
-- **What:** Access to 100+ AI models on Replicate — FLUX for images, Wan/Kling/Veo for video generation, image-to-video, upscaling, and more. Goes beyond the built-in KIE models when you need specific styles or capabilities.
-- **Signup:** https://replicate.com — create account, get API token from dashboard
+### 4e. Replicate API Token (OPTIONAL: specific image/video models)
+- **What:** Hundreds of models (FLUX.2, Kling, Seedance, Wan and more) when you want a specific model, or as a fallback when a KIE clip fails.
+- **Signup:** https://replicate.com (create an account, get an API token)
 - **Variable:** `REPLICATE_API_TOKEN`
 - **Command:** `export REPLICATE_API_TOKEN=your-token-here`
 - **Persistence:** `echo 'export REPLICATE_API_TOKEN=your-token-here' >> ~/.zshrc`
-- **Note:** This is optional. Skip if the built-in image/video generation from KIE is sufficient.
 
 After each key, ask the user to confirm they've set it before moving to the next one. It's OK to skip optional ones.
 
@@ -138,10 +142,10 @@ source ~/.zshrc
 
 Then verify the environment variables are set:
 ```bash
-echo "KIE_API_KEY: ${KIE_API_KEY:+SET}" 
+echo "ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:+SET}"
+echo "KIE_API_KEY: ${KIE_API_KEY:+SET}"
 echo "TWELVELABS_API_KEY: ${TWELVELABS_API_KEY:+SET}"
 echo "PEXELS_API_KEY: ${PEXELS_API_KEY:+SET}"
-echo "ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:+SET}"
 echo "REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN:+SET}"
 ```
 

@@ -1,37 +1,37 @@
 # Voiceover Sync — Per-Scene TTS & Timing
 
-This follows the structure of the official `remotion-markup` skill (voiceover.md): one audio file per scene, measured in `calculateMetadata`, with the scene durations passed as props. The only difference is how the audio is made: **use the `generate_speech` MCP tool, not a fetch script to the ElevenLabs API.** Don't write `generate-voiceover.ts` and don't ask the user for an `ELEVENLABS_API_KEY`; `generate_speech` runs through KIE and needs neither.
+This follows the official `remotion-markup` skill (voiceover.md): one audio file per scene, measured in `calculateMetadata`, with the scene durations passed as props. The audio comes from the official ElevenLabs `text-to-speech` skill, through the one generation script in `audio-integration.md`. What this rule adds is the per-scene split, the names and the voice choice.
 
 ## Generating Voiceover
 
-Split the approved script into scenes, then call `remotion-media`'s `generate_speech` once per scene:
+Split the approved script into scenes and put one entry per scene in the script's `voiceover` list:
 
-```
-generate_speech:
-  text: "Welcome to our app."      # this scene's narration only
-  output_name: "vo-scene1"         # vo-scene2, vo-scene3, ...
-  voice: "Eric"
-  model: "multilingual_v2"         # optional: best quality; default turbo_v2_5 is faster
-  stability: 0.5                   # optional, 0-1
-  similarity_boost: 0.75           # optional, 0-1
-  speed: 1.0                       # optional, 0.7-1.2
+```ts
+const voiceover = [
+  { name: "vo-scene1", text: "Welcome to our app." },       // this scene's narration only
+  { name: "vo-scene2", text: "Everything in one place." },  // vo-scene3, vo-scene4, ...
+];
 ```
 
-The file lands at `public/vo-scene1.mp3` in the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root. The tool returns **the file path only, not a duration**; measure it as shown below. Max 5000 characters per call.
+Run `node scripts/generate-audio.ts` from the project root. Each line lands at `public/vo-sceneN.mp3`; existing files are skipped, so delete one to regenerate just that line. The script reports **no duration**; measure the files as shown below.
+
+- **Model:** `eleven_v4` (the official default). It takes only `stability` and `similarity_boost`, with no `style` or `speed`: steer delivery with audio tags (`[excited]`, `[whispers]`) and punctuation instead. For a long single read that has to stay very even, `eleven_multilingual_v2` is the official alternative.
+- **Language:** pass `languageCode` (e.g. `"es"`) for non-English narration, per the official skill.
+
+**Alternatives:** the deprecated ElevenLabs MCP `text_to_speech` (interactive one-offs; rename its output to `vo-sceneN.mp3`), or KIE `generate_speech` for drafts (`text`, `output_name: "vo-scene1"`, `voice: "Eric"`, max 5000 characters). Suno and the other KIE-resold models aren't licensed by their owners through KIE. Use KIE audio for drafts and internal work, and generate final commercial audio with ElevenLabs.
 
 ## Voice Selection Guide
 
-- **Eric** — Warm, professional male voice (good default)
-- **Rachel** — Clear, engaging female voice (good default)
-- **Aria** — Energetic female voice (good for promos)
-- **Roger** — Deep, authoritative male voice (good for narration)
-- **Sarah** — Friendly, conversational female voice
-- **Laura** — Calm, soothing female voice
-- **Charlie** — Casual, youthful male voice
+Set `VOICE_ID` in the script once and use the same voice for every scene of one narrator. Pre-made voices from the official skill:
 
-Also available: George, Callum, River, Liam, Charlotte, Alice, Matilda, Will, Jessica, Chris, Brian, Daniel, Lily, Bill. Use the same voice for every scene of one narrator.
+- **George** (`JBFqnCBsd6RMkjVDRZzb`) — Male, narrative (good default)
+- **Sarah** (`EXAVITQu4vr4xnSDxMaL`) — Female, soft
+- **Daniel** (`onwK4e9ZLuTAKqWW03F9`) — Male, authoritative (good for narration)
+- **Charlotte** (`XB0fDUnXU5powFXDhCwa`) — Female, conversational
 
-For custom/cloned voices or a specific ElevenLabs voice ID, use the dedicated ElevenLabs MCP instead (see `elevenlabs-advanced.md`).
+For any other voice (a mood, an accent, a language), search the account or the shared library and paste its ID: see "Voice Library" in `elevenlabs-advanced.md`. Cloned voices and several speakers in one script are covered there too.
+
+KIE drafts use voice names instead of IDs: Eric (default), Rachel, Aria, Roger, Sarah, Laura, Charlie, George, Callum, River, Liam, Charlotte, Alice, Matilda, Will, Jessica, Chris, Brian, Daniel, Lily, Bill.
 
 ## Sizing Scenes from the Audio
 
@@ -72,12 +72,7 @@ export const calculateMetadata: CalculateMetadataFunction<Props> = async ({
 
 ## Captions from the Voiceover
 
-Word-level captions follow the official `remotion-captions` skill; `captions-workflow.md` adds the TikTok-style presets. Use `generate_subtitles` only when the user wants an `.srt` file, or for quick line-level captions imported with `parseSrt` (official import-srt-captions.md):
-
-```
-generate_subtitles:
-  input_file: "vo-scene1.mp3"  # filename inside public/
-```
+Caption each `vo-sceneN.mp3` on its own with the official `remotion-captions` flow (word-level, `@remotion/whisper-webgpu`), or with the ElevenLabs Scribe fallback when there's no GPU. `captions-workflow.md` has both routes and the TikTok-style presets.
 
 ## Best Practices
 

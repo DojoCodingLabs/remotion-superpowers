@@ -1,13 +1,13 @@
 ---
 name: add-captions
-description: Add TikTok-style, karaoke, YouTube or minimal captions to your Remotion video. Gets word-level captions through the official remotion-captions flow (or line-level SRT via generate_subtitles), places one official caption element per clip, and applies a style preset with platform-safe placement.
+description: Add TikTok-style, karaoke, YouTube or minimal captions to your Remotion video. Gets word-level captions through the official remotion-captions flow (whisper-webgpu, or ElevenLabs Scribe via @remotion/elevenlabs when there's no GPU), or imports the user's SRT with parseSrt, places one official caption element per clip, and applies a style preset with platform-safe placement.
 ---
 
 # Add Captions: Animated Subtitles
 
 You are helping the user add captions to their Remotion video.
 
-**Load the `remotion-production` skill** for the `captions-workflow` rule (presets and safe zones), and the official **`remotion-captions`** skill for transcription and display. The official skill wins on any API detail.
+**Load the `remotion-production` skill** for the `captions-workflow` rule (routes, presets and safe zones), and the official **`remotion-captions`** skill for transcription and display. For the Scribe fallback, also load the official ElevenLabs **`speech-to-text`** skill. The official skills win on any API detail.
 
 ## Workflow
 
@@ -16,36 +16,31 @@ You are helping the user add captions to their Remotion video.
 Find the voiceover or primary audio file(s):
 
 ```bash
-ls public/ public/footage/ 2>/dev/null | grep -E '\.(mp3|wav|m4a|ogg|mp4|mov|webm)$'
+ls public/ public/footage/ 2>/dev/null | grep -E '\.(mp3|wav|m4a|ogg|mp4|mov|webm|srt)$'
 ```
 
-If no audio exists, suggest running `/add-voiceover` first. If the video has one voiceover per scene (`vo-scene1.mp3`, `vo-scene2.mp3`, …), caption **each file separately**.
+If the user already has an `.srt` file, use it (step 3). If no audio exists, suggest running `/add-voiceover` first. If the video has one voiceover per scene (`vo-scene1.mp3`, `vo-scene2.mp3`, …), caption **each file separately**.
 
 Make sure Studio is already running (`npx remotion studio`, or `--no-open` with an in-app browser; open the URL it prints), so the user sees captions appear.
 
 ### 2. Choose Caption Style
 
-Ask the user what style they want. The style decides which transcription route you need:
+Ask the user what style they want:
 
 - **TikTok style** (default): bold, a few words at a time, the active word pops in a highlight color. *Needs word-level.*
 - **Karaoke style**: full phrase on screen, words highlight as they're spoken. *Needs word-level.*
-- **YouTube style**: bottom of screen, a sentence at a time. *Works with SRT.*
-- **Minimal**: small, subtle, bottom-left. *Works with SRT.*
+- **YouTube style**: bottom of screen, a sentence at a time. *Also works with the user's SRT.*
+- **Minimal**: small, subtle, bottom-left. *Also works with the user's SRT.*
 
 ### 3. Transcribe
 
-**Word-level (TikTok, karaoke):** follow official `remotion-captions/transcribe-captions.md`. It writes a Node script with `@remotion/whisper-webgpu` that outputs `Caption` JSON with one entry per word. It needs a compatible GPU and doesn't run on Linux arm64.
+Both routes give word-level `Caption` JSON, so every style works. Save each file's result as `public/<source>.captions.json` (e.g. `vo-scene1.captions.json`).
 
-**Line-level (YouTube, minimal, or when whisper-webgpu can't run):**
+**Default: official whisper-webgpu.** Follow official `remotion-captions/transcribe-captions.md`. It writes a Node script with `@remotion/whisper-webgpu` that outputs one `Caption` per word. Local and free. It needs a compatible GPU and doesn't run on Linux arm64. Use `small.en` for English; for other languages use a multilingual model and pass `language`.
 
-```
-Use remotion-media generate_subtitles:
-- input_file: [filename inside public/, e.g. vo-scene1.mp3]
-- output_name: [optional, e.g. subs-scene1]
-```
-Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+**Fallback: ElevenLabs Scribe.** When the script's `canUseWhisperWebGpu()` check fails, transcribe with Scribe v2 and convert with `elevenLabsTranscriptToCaptions()` from `@remotion/elevenlabs` (`npx remotion add @remotion/elevenlabs`). The script is in the `captions-workflow` rule. It needs `ELEVENLABS_API_KEY` (if it isn't set, run `npx -y @elevenlabs/cli@latest onboard init`), costs credits and sends the audio to ElevenLabs, so tell the user before running it. It accepts video files directly.
 
-This returns an **SRT** file, and SRT is line-level. Convert it with `parseSrt()` from `@remotion/captions`, as official `import-srt-captions.md` shows. Each caption is then a whole subtitle line, so a word highlight can't work from it. If the user picked TikTok or karaoke and only SRT is possible, tell them and offer the YouTube style instead.
+**User's own SRT.** Put it in `public/` and read it with `parseSrt()` from `@remotion/captions`, as official `import-srt-captions.md` shows. SRT is line-level: each caption is a whole subtitle line, so a word highlight can't work from it. If the user picked TikTok or karaoke, offer to transcribe the audio instead, or use the YouTube style with their SRT.
 
 Keep each transcript's timestamps relative to its own source file.
 

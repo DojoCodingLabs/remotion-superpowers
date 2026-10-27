@@ -10,24 +10,27 @@ There is one convention, and it follows from how the tools write files:
 
 | Source | Lands in | How the type is encoded |
 |---|---|---|
-| remotion-media tools (`generate_speech`, `generate_music`, `generate_sound_effect`, `generate_image`, `generate_video_from_*`, `generate_subtitles`) | `public/<output_name>.<ext>`, the `public/` **root** | Prefix in `output_name`: `vo-`, `music-`, `sfx-`, `img-`, `clip-` |
-| ElevenLabs MCP (`text_to_speech`, `isolate_audio`) | Whatever `output_directory` you pass (default `~/Desktop`) | Pass the project's `public/`, then rename to the `vo-` convention |
+| Audio script (`scripts/generate-audio.ts`, official ElevenLabs skills) | `public/<name>.mp3`, the `public/` **root** | The `name` in the script: `vo-`, `music-`, `sfx-` |
+| remotion-media tools (`generate_image`, `generate_video_from_*`; `generate_speech`, `generate_music`, `generate_sound_effect` for drafts) | `public/<output_name>.<ext>`, the `public/` **root** | Prefix in `output_name`: `img-`, `clip-`, `vo-`, `music-`, `sfx-` |
+| ElevenLabs MCP, deprecated (`text_to_speech`, `text_to_sound_effects`, `compose_music`, `isolate_audio`, …) | `public/`, because its base path is `./public`. It also only reads input files from inside `public/`. | Leave `output_directory` out or pass the absolute `public/` path, then rename to the convention (it picks its own filenames) |
+| Captions you transcribe (`captions-workflow.md`) | `public/<source>.captions.json`, and `public/<source>.srt` if exported | Named after the source file |
 | Files you download yourself (Pexels, Replicate) | `public/footage/` and `public/images/` | Folder, after `mkdir -p public/footage public/images` |
 | Hosted SFX (`https://remotion.media/*.wav`) | Nowhere; use the URL as `src` | — |
 
-The remotion-media tools can't write into subfolders, so don't create `public/audio/` or move their files around: keep them at the root with a type prefix. They write to `public/` of the directory the agent was launched from, so start the agent from the Remotion project root.
+The remotion-media tools can't write into subfolders, so keep generated media at the root with a type prefix, and don't create `public/audio/`. Everything generated lands at the root the same way, whichever route made it. remotion-media and the ElevenLabs MCP both resolve `public/` against the directory the agent was launched from, so start the agent from the Remotion project root.
 
-This replaces the `public/voiceover/<compositionId>/` layout in the official voiceover guide: that one assumes you write the files yourself with a script.
+This replaces the `public/voiceover/<compositionId>/` layout in the official voiceover guide: one flat, prefixed root works the same for every tool.
 
 ```
 public/
-├── vo-scene1.mp3                  # generate_speech
+├── vo-scene1.mp3                  # scripts/generate-audio.ts
 ├── vo-scene2.mp3
-├── music-bg.mp3                   # generate_music
-├── sfx-whoosh-transition.mp3      # generate_sound_effect
+├── music-bg.mp3                   # scripts/generate-audio.ts
+├── sfx-whoosh-transition.mp3      # scripts/generate-audio.ts
 ├── img-hero-office.png            # generate_image
 ├── clip-city-aerial.mp4           # generate_video_from_text / _from_image
-├── vo-scene1.srt                  # generate_subtitles
+├── vo-scene1.captions.json        # word-level captions (Caption[])
+├── vo-scene1.srt                  # optional SRT export
 ├── footage/                       # downloaded by you
 │   ├── stock-city-aerial-sunset.mp4
 │   └── replicate-product-rotate.mp4
@@ -41,7 +44,7 @@ public/
 
 ### Pattern: `[type]-[description]-[detail]`
 
-For remotion-media tools, this is the `output_name` (no extension; the tool adds it).
+This is the `name` in the audio script and the `output_name` for remotion-media tools (no extension; the script and the tools add it).
 
 | Type | Prefix | Examples |
 |---|---|---|
@@ -54,7 +57,7 @@ For remotion-media tools, this is the `output_name` (no extension; the tool adds
 | Stock photo (downloaded) | `images/stock-` | `images/stock-team-meeting.jpg` |
 | Replicate output (downloaded) | `footage/` or `images/` + `replicate-` | `images/replicate-hero-flux.png` |
 
-Captions: `generate_subtitles` defaults `output_name` to the input name, so `vo-scene1.mp3` gives `vo-scene1.srt`. Word-level caption JSON from the official `remotion-captions` flow goes wherever that skill puts it.
+Captions take the source file's name: `vo-scene1.mp3` gives `vo-scene1.captions.json` (word-level `Caption[]`) and, if exported, `vo-scene1.srt`. User-supplied SRT files keep their name in `public/` and are read with `parseSrt()`.
 
 ### What to Avoid
 
@@ -71,8 +74,8 @@ Remotion accesses public assets through `staticFile()` with the exact path relat
 import { Audio, Video } from "@remotion/media";
 import { Img, staticFile } from "remotion";
 
-<Audio src={staticFile("vo-scene1.mp3")} />            // remotion-media: root
-<Img src={staticFile("img-hero-office.png")} />         // remotion-media: root
+<Audio src={staticFile("vo-scene1.mp3")} />            // generated: root
+<Img src={staticFile("img-hero-office.png")} />         // generated: root
 <Video src={staticFile("footage/stock-city-aerial-sunset.mp4")} />  // downloaded: subfolder
 ```
 
@@ -82,7 +85,7 @@ import { Img, staticFile } from "remotion";
 |---|---|---|
 | `staticFile("/public/vo-scene1.mp3")` | Leading slash and `public/` prefix | `staticFile("vo-scene1.mp3")` |
 | `staticFile("./vo-scene1.mp3")` | Relative path prefix | `staticFile("vo-scene1.mp3")` |
-| `staticFile("audio/vo-scene1.mp3")` | remotion-media files are at the root, not in `audio/` | `staticFile("vo-scene1.mp3")` |
+| `staticFile("audio/vo-scene1.mp3")` | Generated audio is at the root, not in `audio/` | `staticFile("vo-scene1.mp3")` |
 | `staticFile("stock-city.mp4")` | Downloaded footage lives in `footage/` | `staticFile("footage/stock-city.mp4")` |
 | `src="/vo-scene1.mp3"` | Not using staticFile | `src={staticFile("vo-scene1.mp3")}` |
 | `staticFile("footage/My File.mp4")` | Spaces in filename | Rename to `my-file.mp4` |
@@ -119,7 +122,7 @@ grep -r "staticFile(" src/ --include="*.tsx" --include="*.ts"
 
 ## Best Practices
 
-1. **Follow the convention from the start** — type prefixes at the `public/` root for tool output; `footage/` and `images/` only for files you download
+1. **Follow the convention from the start** — type prefixes at the `public/` root for everything generated; `footage/` and `images/` only for files you download
 2. **Use descriptive names** — your future self (and Claude) will thank you
 3. **Never put assets in `src/`** — only `public/` works with `staticFile()`
 4. **Run `ls -R public/` before a render** — catch missing files early

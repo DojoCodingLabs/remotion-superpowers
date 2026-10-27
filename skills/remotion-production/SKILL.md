@@ -7,7 +7,17 @@ description: Media orchestration for Remotion videos. Generates and sources the 
 
 This skill covers what Remotion's own skills don't: **getting the media**. It orchestrates 5 MCP servers to produce voiceovers, music, SFX, footage, images and clips, then wires them into a Remotion composition.
 
-## Works on top of Remotion's official skills
+## Works on top of the official skills
+
+This plugin builds on each provider's own Agent Skills and keeps only what's specific to making Remotion videos:
+
+| Provider | Official skills | Install |
+|---|---|---|
+| Remotion | `remotion-best-practices` + sub-skills | `npx skills add remotion-dev/skills` |
+| ElevenLabs | `text-to-speech`, `sound-effects`, `music`, `speech-to-text`, `voice-isolator`, `voice-changer` | `npx skills add elevenlabs/skills` |
+| Replicate | `find-models`, `run-models`, `compare-models`, `prompt-images`, `prompt-videos` | `npx skills add replicate/skills` |
+
+TwelveLabs has no Agent Skills; its agent docs are at https://docs.twelvelabs.io (and `llms.txt`).
 
 Remotion maintains the official Agent Skills (`remotion-best-practices` and its sub-skills: `remotion-create`, `remotion-markup`, `remotion-studio`, `remotion-render`, `remotion-captions`, `remotion-multimedia`, …). They're the source of truth for Remotion APIs and change with every Remotion release. If they're missing, install them first: `npx skills add remotion-dev/skills` (or run the `setup` skill).
 
@@ -15,7 +25,9 @@ Remotion maintains the official Agent Skills (`remotion-best-practices` and its 
 
 | Concern | Follow |
 |---|---|
-| Generating or sourcing media (speech, music, SFX, images, clips, stock footage, footage analysis, AI review) | **This skill**: use the MCP tools below. Don't write scripts that call provider APIs (ElevenLabs, Suno, etc.) directly, and don't ask the user for a provider key the MCP tools already cover. |
+| Voiceover, sound effects, music | **Official ElevenLabs skills**: a small SDK script in the project that writes to `public/` with this skill's names. Defaults: `eleven_v4` (speech), `music_v2_5` (music). |
+| Images and AI clips | **This skill**: KIE via `remotion-media`; Replicate (with the official Replicate skills) for specific models or when KIE fails |
+| Stock footage, footage analysis, AI review | **This skill**: Pexels and TwelveLabs MCP tools |
 | Remotion markup: components, imports, timing props, animation, effects, transitions, fonts | **Official** `remotion-markup` |
 | Project scaffolding | **Official** `remotion-create` |
 | Preview | **Official** `remotion-best-practices` / `remotion-studio`: start Studio as soon as the project runs, before building scenes, and keep it open |
@@ -26,38 +38,35 @@ Remotion maintains the official Agent Skills (`remotion-best-practices` and its 
 
 If a code snippet here ever disagrees with the official skills, the official skills win.
 
-## Available MCP tools
+## Providers and MCP tools
 
-### remotion-media (via KIE)
-- `generate_speech`: text-to-speech voiceovers (ElevenLabs TTS)
-- `generate_music`: background music (Suno)
-- `generate_sound_effect`: custom sound effects (ElevenLabs SFX)
+### ElevenLabs (voice, SFX, music: the default)
+- Generate with the official ElevenLabs skills (SDK script, `ELEVENLABS_API_KEY`). Eleven Music is cleared for commercial use on paid plans.
+- **Deprecated alternative:** the `ElevenLabs` MCP server (`elevenlabs-mcp` 0.12.2, archived upstream) still ships for one more release for quick interactive work: `text_to_speech`, `text_to_sound_effects`, `compose_music`, `voice_clone`, `search_voices`, `search_voice_library`, `isolate_audio`, `speech_to_text`. It only reads and writes inside `public/`; pass `output_directory` as the project's `public/`.
+
+### remotion-media (via KIE: images and clips)
 - `generate_image`: AI images (Nano Banana Pro)
 - `generate_video_from_text`: AI clips from a prompt (Veo 3.1)
-- `generate_video_from_image`: animate 1 image, or transition between 2 (Veo 3.1)
-- `generate_subtitles`: line-level SRT via local Whisper (for SRT export; word-level captions come from the official `remotion-captions` flow)
+- `generate_video_from_image`: animate 1 image, or transition between 2. `image_urls` must be public URLs.
+- `generate_speech`, `generate_music`, `generate_sound_effect`: **drafts only.** Suno and the other KIE-resold models aren't licensed by their owners through KIE. Use KIE audio for drafts and internal work, and generate final commercial audio with ElevenLabs.
 - `list_assets`: browse the Airtable asset library (requires `AIRTABLE_API_KEY`)
+- Don't use its subtitles tool; captions go through the official Remotion flow.
+- KIE's Veo depends on a preview Google is retiring. If a clip call fails, fall back to Replicate.
 
 These tools return the file path, not the duration. Measure durations as the official `remotion-multimedia` skill shows.
 
-### TwelveLabs (video understanding)
-- Index and analyze video files
-- Semantic search inside videos ("find the part where…")
-- Scene, object and speaker detection; summaries
+### TwelveLabs (video understanding and AI review)
+- `create-asset` (upload a local file) → `sync-analyse-video` or `async-analyse-video` with `modelName: "pegasus1.5"` and a JSON response schema → `delete-asset` when done
+- `search` only finds moments inside an indexed library ("the part where…"); it doesn't analyse.
 
 ### Pexels (stock footage)
-- `photos_search`, `videos_search`: search free stock media
-- `video_get` / `photo_get`: details by ID
-- No download tool: take the file URL from `video_get` (or the search result's `video_files`) and `curl` it into `public/footage/`
+- `pexels_search_videos`, `pexels_search_photos`, `pexels_popular_videos`, `pexels_curated_photos`, `pexels_get_video`, `pexels_get_photo`, collections
+- No download tool: take the file URL from `pexels_get_video` (or the search result) and `curl` it into `public/footage/`.
+- Pexels doesn't require attribution, but it's appreciated.
 
-### ElevenLabs (optional, advanced voice)
-- `voice_clone`, `search_voices`, `search_voice_library`, `isolate_audio`, `text_to_speech`, `speech_to_text`, and more
-- These tools save to `~/Desktop` unless you pass an output directory. Always point them at the project's `public/`.
-
-### Replicate (optional, 100+ models)
-- `replicate_run`: synchronous (images)
-- `replicate_create_prediction` / `replicate_get_prediction`: async (video), poll until done
-- Image models: FLUX 1.1 Pro, Imagen 4, Ideogram v3, FLUX Kontext. Video models: Wan 2.5, Kling 2.6 Pro.
+### Replicate (optional, specific models)
+- Local `replicate-mcp` with `REPLICATE_API_TOKEN`: `search_models`, `get_models`, `list_models_examples`, `create_models_predictions` / `create_predictions`, `get_predictions`, `download_files`
+- Follow the official Replicate skills: search for the model and read its input schema before calling. See `rules/replicate-models.md` for a dated shortlist.
 
 ## Asset conventions
 

@@ -100,15 +100,17 @@ Rendering a few frames as PNGs is much faster than a full MP4 and is often enoug
 
 ## Render with API Keys (secrets)
 
-If your video uses MCP-generated assets that are checked into `public/` in git, no secrets are needed for CI rendering. Rendering never calls the MCP tools, so commit the generated files. If you need to generate assets in CI:
+If your video uses generated assets that are checked into `public/` in git, no secrets are needed for CI rendering. Rendering never calls the MCP tools or the audio script, so commit the generated files. If you need to generate assets in CI, add only the keys for the providers you use:
 
 ```yaml
 env:
-  KIE_API_KEY: ${{ secrets.KIE_API_KEY }}
-  PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+  ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}     # audio script (scripts/generate-audio.ts)
+  KIE_API_KEY: ${{ secrets.KIE_API_KEY }}                   # remotion-media images and clips
+  PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}             # stock footage
+  REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}   # local replicate-mcp
 ```
 
-Add these as GitHub repository secrets in Settings → Secrets → Actions. Never echo them in a step or commit them to `.env`.
+The hosted Replicate server (`mcp.replicate.com`) needs a browser OAuth login, so it can't run headless; CI must use the local `replicate-mcp` with the token. Add these as GitHub repository secrets in Settings → Secrets → Actions. Never echo them in a step or commit them to `.env`.
 
 ## Render Multiple Compositions
 

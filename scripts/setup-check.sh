@@ -25,10 +25,10 @@ echo ""
 if command -v node &> /dev/null; then
     NODE_VERSION=$(node --version)
     NODE_MAJOR=$(echo "$NODE_VERSION" | sed 's/v//' | cut -d. -f1)
-    if [ "$NODE_MAJOR" -ge 18 ]; then
+    if [ "$NODE_MAJOR" -ge 22 ]; then
         echo -e "  ${GREEN}✓${NC} Node.js $NODE_VERSION"
     else
-        echo -e "  ${RED}✗${NC} Node.js $NODE_VERSION (need >= 18)"
+        echo -e "  ${RED}✗${NC} Node.js $NODE_VERSION (need >= 22.18)"
         ERRORS=$((ERRORS + 1))
     fi
 else
@@ -50,7 +50,7 @@ if command -v python3 &> /dev/null; then
 elif command -v python &> /dev/null; then
     echo -e "  ${GREEN}✓${NC} Python $(python --version 2>&1 | awk '{print $2}')"
 else
-    echo -e "  ${YELLOW}⚠${NC} Python not found (needed for ElevenLabs & Pexels MCP)"
+    echo -e "  ${YELLOW}⚠${NC} Python not found (only for the optional ElevenLabs MCP server)"
     WARNINGS=$((WARNINGS + 1))
 fi
 
@@ -58,7 +58,7 @@ fi
 if command -v uvx &> /dev/null; then
     echo -e "  ${GREEN}✓${NC} uvx found"
 else
-    echo -e "  ${YELLOW}⚠${NC} uvx not found (needed for ElevenLabs & Pexels MCP)"
+    echo -e "  ${YELLOW}⚠${NC} uvx not found (only for the optional ElevenLabs MCP server)"
     echo "     Install: curl -LsSf https://astral.sh/uv/install.sh | sh"
     WARNINGS=$((WARNINGS + 1))
 fi
@@ -92,11 +92,20 @@ echo ""
 echo "🔑 API Keys"
 echo ""
 
-# KIE (primary)
+# ElevenLabs (voice, SFX, music)
+if [ -n "$ELEVENLABS_API_KEY" ]; then
+    echo -e "  ${GREEN}✓${NC} ELEVENLABS_API_KEY is set"
+else
+    echo -e "  ${RED}✗${NC} ELEVENLABS_API_KEY not set (voiceover, sound effects, music)"
+    echo "     Signup: https://elevenlabs.io"
+    ERRORS=$((ERRORS + 1))
+fi
+
+# KIE (images, clips)
 if [ -n "$KIE_API_KEY" ]; then
     echo -e "  ${GREEN}✓${NC} KIE_API_KEY is set"
 else
-    echo -e "  ${RED}✗${NC} KIE_API_KEY not set (primary — covers Suno + ElevenLabs + more)"
+    echo -e "  ${RED}✗${NC} KIE_API_KEY not set (AI images and video clips)"
     echo "     Signup: https://kie.ai"
     ERRORS=$((ERRORS + 1))
 fi
@@ -116,15 +125,6 @@ if [ -n "$PEXELS_API_KEY" ]; then
 else
     echo -e "  ${YELLOW}⚠${NC} PEXELS_API_KEY not set (free stock footage)"
     echo "     Signup: https://www.pexels.com/api/ (free)"
-    WARNINGS=$((WARNINGS + 1))
-fi
-
-# ElevenLabs (optional)
-if [ -n "$ELEVENLABS_API_KEY" ]; then
-    echo -e "  ${GREEN}✓${NC} ELEVENLABS_API_KEY is set"
-else
-    echo -e "  ${YELLOW}⚠${NC} ELEVENLABS_API_KEY not set (optional — advanced voice features)"
-    echo "     Signup: https://elevenlabs.io (free tier available)"
     WARNINGS=$((WARNINGS + 1))
 fi
 
