@@ -104,80 +104,38 @@ Wan models use `num_frames` (at 16fps):
 
 ## Remotion Integration
 
-### Full-Scene Background Clip
+### Where the files land
+
+- **remotion-media** (`generate_video_from_text`, `generate_video_from_image`) writes `public/<output_name>.mp4`. Put the type in the name: `output_name: "clip-city-aerial"` becomes `staticFile("clip-city-aerial.mp4")`.
+- **Replicate** returns a URL. Download it yourself: `mkdir -p public/footage && curl -L -o public/footage/clip-city-aerial.mp4 "<output_url>"`, then `staticFile("footage/clip-city-aerial.mp4")`.
+
+### Placing clips
+
+Place clips with `<Video>` from `@remotion/media` (install with `npx remotion add @remotion/media`), following the official `remotion-markup` skill: embedding-videos.md for trimming, volume and looping, video-editing.md for cutting several clips together with `TransitionSeries` or a `Track`, and transitions.md for cross-fades. Trim with `trimBefore` plus `durationInFrames`.
 
 ```tsx
-import { OffthreadVideo, staticFile } from "remotion";
+import { Video } from "@remotion/media";
+import { TransitionSeries } from "@remotion/transitions";
+import { staticFile, useVideoConfig } from "remotion";
 
-<OffthreadVideo
-  src={staticFile("footage/ai-city-aerial.mp4")}
-  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-/>
+// Veo clips run ~8 s: keep the best 3-5 s of each and mute the generated audio
+export const AiBroll: React.FC = () => {
+  const { fps } = useVideoConfig();
+
+  return (
+    <TransitionSeries name="AI b-roll">
+      <TransitionSeries.Sequence name="Aerial" durationInFrames={4 * fps}>
+        <Video name="Aerial clip" src={staticFile("clip-city-aerial.mp4")} muted objectFit="cover" />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Sequence name="Close-up" trimBefore={1 * fps} durationInFrames={3 * fps}>
+        <Video name="Close-up clip" src={staticFile("footage/clip-closeup.mp4")} muted objectFit="cover" />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  );
+};
 ```
 
-### Trimmed Clip in a Sequence
-
-```tsx
-<Sequence from={5 * fps} durationInFrames={3 * fps}>
-  <OffthreadVideo
-    src={staticFile("footage/ai-clip.mp4")}
-    startFrom={0}
-    endAt={3 * fps}
-    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-  />
-</Sequence>
-```
-
-### Sequencing Multiple AI Clips
-
-```tsx
-const clips = [
-  { src: "footage/scene1-aerial.mp4", duration: 4 },
-  { src: "footage/scene2-closeup.mp4", duration: 3 },
-  { src: "footage/scene3-wide.mp4", duration: 5 },
-];
-
-let offset = 0;
-<>
-  {clips.map((clip, i) => {
-    const from = offset;
-    offset += clip.duration * fps;
-    return (
-      <Sequence key={i} from={from} durationInFrames={clip.duration * fps}>
-        <OffthreadVideo
-          src={staticFile(clip.src)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </Sequence>
-    );
-  })}
-</>
-```
-
-### AI Clip with Text Overlay
-
-```tsx
-<AbsoluteFill>
-  <OffthreadVideo
-    src={staticFile("footage/ai-background.mp4")}
-    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-  />
-  <AbsoluteFill style={{
-    background: "linear-gradient(transparent 50%, rgba(0,0,0,0.7))",
-  }}>
-    <div style={{
-      position: "absolute",
-      bottom: 80,
-      left: 60,
-      color: "white",
-      fontSize: 64,
-      fontWeight: "bold",
-    }}>
-      Scene Title
-    </div>
-  </AbsoluteFill>
-</AbsoluteFill>
-```
+For a title over a clip, layer an `<AbsoluteFill>` with a bottom gradient (`linear-gradient(transparent 50%, rgba(0,0,0,0.7))`) and the text above the `<Video>`. For a grade, use the official effects on the `<Video>` (see `visual-effects.md`).
 
 ## Best Practices
 
@@ -185,7 +143,8 @@ let offset = 0;
 2. **Use image-to-video for more control** — generate a perfect still first, then animate
 3. **Be specific about camera motion** — "slow dolly zoom" beats "moving camera"
 4. **Sequence short clips** — 3 x 4-second clips > 1 x 12-second clip
-5. **Use `OffthreadVideo`** — always prefer over `<Video>` for better rendering performance
-6. **Download outputs to `public/footage/`** — keep AI clips organized with stock footage
+5. **Use `<Video>` from `@remotion/media`** — the official video component for every clip
+6. **Keep the asset convention** — remotion-media clips land at `public/clip-<name>.mp4`; Replicate downloads go to `public/footage/`
 7. **Combine with stock footage** — intercut AI clips with Pexels footage for variety
-8. **Add subtle post-processing** — a slight zoom or color grade in Remotion adds polish
+8. **Add subtle post-processing** — a slight zoom or a `colorCorrection()` grade in Remotion adds polish
+9. **Mute generated audio** — Veo clips can include sound; add `muted` unless you want it

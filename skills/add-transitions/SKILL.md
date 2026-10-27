@@ -1,149 +1,74 @@
 ---
 name: add-transitions
-description: Add professional scene transitions to your Remotion video. Choose from fade, slide, wipe, flip, clock-wipe and more — with spring physics or linear timing.
+description: Add professional scene transitions to your Remotion video. Choose from fade, slide, wipe, flip, clock-wipe and light-leak overlays — with spring or linear timing.
 ---
 
 # Add Transitions — Scene Transition Wizard
 
-You are helping the user add professional transitions between scenes in their Remotion composition using `@remotion/transitions`.
+You are helping the user add professional transitions between scenes in their Remotion composition. This skill is the Q&A and the creative call (which transition fits which cut). **For the API, follow the official `remotion-markup` skill**: `transitions.md` for `TransitionSeries`, presentations, timing, overlays and duration math, and `light-leaks.md` for light-leak overlays. Don't write transition code from memory.
 
 ## Workflow
 
-### 1. Install Transitions Package
+### 1. Check the Preview Is Running
 
-```bash
-npx remotion add @remotion/transitions
-```
+Studio should already be open (`npx remotion studio`, or `npx remotion studio --no-open` with an in-app browser; open the URL it prints). If not, start it now so the user sees each transition as you add it.
 
 ### 2. Audit Current Scenes
 
-Look at the current composition and identify where transitions should go:
+Look at the current composition and identify the cut points:
 
 ```bash
-# Find scene components
-grep -r "Sequence" src/ --include="*.tsx" --include="*.ts" -l
+grep -rlE "Sequence|TransitionSeries|Track" src/ --include="*.tsx" --include="*.ts"
 ```
 
-List the scenes and ask where the user wants transitions.
+List the scenes and ask where the user wants transitions. If the scenes are still a chain of `<Sequence from>` hard cuts, they move into `<TransitionSeries>` with one `<TransitionSeries.Sequence>` per scene, as official transitions.md shows (install `@remotion/transitions` with `npx remotion add @remotion/transitions`).
 
 ### 3. Choose Transition Types
 
-Available transitions from `@remotion/transitions`:
+Ask about the mood of each cut, then suggest:
 
 | Transition | Effect | Best For |
 |---|---|---|
-| `fade` | Cross-dissolve between scenes | Universal, subtle |
-| `slide` | Scene slides in from a direction | Energetic, modern |
-| `wipe` | New scene wipes over old | Dramatic, reveals |
-| `flip` | 3D card flip | Playful, eye-catching |
-| `clockWipe` | Clock-hand reveal | Creative, unique |
+| `fade` | Cross-dissolve between scenes | Universal, subtle; intros, outros, time passing |
+| `slide` | Scene slides in from a direction | Energetic, modern; lists, step-by-step, social carousels |
+| `wipe` | New scene wipes over old | Dramatic, reveals; before/after |
+| `flip` | 3D card flip | Playful, eye-catching; product variants, surprises |
+| `clockWipe` | Clock-hand reveal | Creative, unique; countdowns, "later that day" |
+| **Light leak** (overlay) | Warm flash of light over a hard cut | Cinematic energy without shortening the video; music drops, montages |
 
-**Slide directions:** `from-left`, `from-right`, `from-top`, `from-bottom`
+**Slide directions:** `from-left`, `from-right`, `from-top`, `from-bottom`. Slides should follow the visual flow (reading direction, or the direction something on screen is moving).
+
+A light leak isn't a transition between scenes: it's a `<TransitionSeries.Overlay>` placed at the cut, which draws on top of the cut point and **doesn't** shorten the timeline. Build it as official light-leaks.md shows.
 
 ### 4. Choose Timing
 
-| Timing | Feel | Code |
+| Timing | Feel | When |
 |---|---|---|
-| Linear | Constant speed, mechanical | `linearTiming({ durationInFrames: 20 })` |
-| Spring | Organic, natural bounce | `springTiming({ config: { damping: 200 }, durationInFrames: 25 })` |
+| Linear (`linearTiming`) | Constant speed, mechanical | Wipes, clock wipes, slides that should feel "mechanical" |
+| Spring (`springTiming`, `damping: 200`) | Smooth ease-in/ease-out, **no bounce** | Most fades and slides; feels natural |
+| Spring with low damping (e.g. 10-20) | Overshoots and settles: a visible bounce | Playful content only, used sparingly |
 
-**Recommended:** Spring timing for most transitions — feels more natural.
+**Recommended:** spring timing with `damping: 200` for most transitions, at 15-25 frames (0.5-0.8s at 30 fps). Shorts: 8-15 frames.
 
-### 5. Refactor to TransitionSeries
+### 5. Apply and Fix the Duration
 
-Convert from `<Sequence>` to `<TransitionSeries>`:
+Write the `TransitionSeries` exactly as official transitions.md shows, with a `name` on each sequence so the user can edit it in Studio.
 
-**Before (hard cuts):**
-```tsx
-<Sequence from={0} durationInFrames={90}>
-  <SceneA />
-</Sequence>
-<Sequence from={90} durationInFrames={90}>
-  <SceneB />
-</Sequence>
-<Sequence from={180} durationInFrames={90}>
-  <SceneC />
-</Sequence>
-```
+**Important:** transitions overlap adjacent scenes, so the total shrinks by the sum of the transition durations (overlays don't change it). Compute it with `getDurationInFrames({ fps })` on each timing object, as official transitions.md shows, and update the `<Composition>` duration or its `calculateMetadata`.
 
-**After (smooth transitions):**
-```tsx
-import { TransitionSeries, linearTiming, springTiming } from "@remotion/transitions";
-import { fade } from "@remotion/transitions/fade";
-import { slide } from "@remotion/transitions/slide";
+### 6. Common Patterns
 
-<TransitionSeries>
-  <TransitionSeries.Sequence durationInFrames={90}>
-    <SceneA />
-  </TransitionSeries.Sequence>
+- **All fade (cinematic):** the same fade everywhere, clean and professional
+- **Slide carousel (social media):** every scene slides in from the right, like swiping
+- **Mixed (dynamic):** fade for intro/outro, slide for body scenes, wipe for reveals, a light-leak overlay on the biggest beat. Match the energy of each cut.
+- **Beat-synced:** for music videos, land each cut on a beat and keep transitions short
 
-  <TransitionSeries.Transition
-    presentation={fade()}
-    timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
-  />
+### 7. Check in the Preview
 
-  <TransitionSeries.Sequence durationInFrames={90}>
-    <SceneB />
-  </TransitionSeries.Sequence>
-
-  <TransitionSeries.Transition
-    presentation={slide({ direction: "from-right" })}
-    timing={linearTiming({ durationInFrames: 15 })}
-  />
-
-  <TransitionSeries.Sequence durationInFrames={90}>
-    <SceneC />
-  </TransitionSeries.Sequence>
-</TransitionSeries>
-```
-
-### 6. Adjust Total Duration
-
-**Important:** Transitions OVERLAP adjacent scenes, so the total duration shrinks:
-
-```
-Total = Sum of all sequence durations - Sum of all transition durations
-
-Example: 3 scenes × 90 frames + 2 transitions × 20 frames
-Total = 270 - 40 = 230 frames
-```
-
-Update the `durationInFrames` in the `<Composition>` registration accordingly.
-
-### 7. Common Patterns
-
-**All fade (cinematic):**
-```tsx
-// Same transition everywhere — clean and professional
-const defaultTransition = (
-  <TransitionSeries.Transition
-    presentation={fade()}
-    timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
-  />
-);
-```
-
-**Slide carousel (social media):**
-```tsx
-// Each scene slides in from the right — like swiping
-presentation={slide({ direction: "from-right" })}
-```
-
-**Mixed (dynamic):**
-```tsx
-// Fade for intro/outro, slide for body scenes, wipe for reveals
-// Mix transitions to match the energy of each cut
-```
-
-### 8. Preview
-
-```bash
-npm run dev
-```
-
-Check transitions in the Remotion preview. Pay attention to:
+Ask the user to scrub each cut in Studio. Pay attention to:
 - Transition speed — too fast feels jarring, too slow feels sluggish
 - Direction — slides should follow the visual flow
 - Consistency — don't use too many different transitions (2-3 types max)
+- Voiceover — a transition shouldn't land in the middle of a spoken word
 
-Adjust `durationInFrames` and `damping` until it feels right.
+Adjust `durationInFrames` and `damping` until it feels right. Don't render unless the user asks.

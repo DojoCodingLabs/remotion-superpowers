@@ -2,19 +2,35 @@
 
 ## Overview
 
-Generate sound effects using remotion-media's `generate_sound_effect` tool (ElevenLabs SFX V2). Well-placed SFX elevate video quality — they make transitions feel polished, impacts feel powerful, and scenes feel immersive.
+Well-placed SFX elevate video quality — they make transitions feel polished, impacts feel powerful, and scenes feel immersive. There are two sources; pick in this order:
+
+1. **Hosted SFX first, for generic sounds.** The official `remotion-markup` skill (sfx.md) lists free files at `https://remotion.media/*.wav`: whoosh, whip, page-turn, switch, mouse-click, shutter-modern, shutter-old, ding, record-scratch, vine-boom and a set of meme sounds. Use the URL directly as the `<Audio>` `src`. No generation cost, no file to manage.
+2. **`generate_sound_effect` for everything else.** remotion-media's tool (ElevenLabs SFX V2) makes custom sounds: a specific impact, an ambience, a branded chime, anything with a particular length or character.
+
+| Need | Source |
+|---|---|
+| Plain whoosh, click, switch, ding, camera shutter, page turn | Hosted (`https://remotion.media/whoosh.wav`, `mouse-click.wav`, `switch.wav`, `ding.wav`, `shutter-modern.wav`, `page-turn.wav`) |
+| Meme sounds for short-form (vine boom, record scratch, bruh…) | Hosted (full list in official sfx.md) |
+| Cinematic booms, risers, stingers, tension | `generate_sound_effect` |
+| Ambience (city, office, rain, nature) | `generate_sound_effect` with `loop: true` |
+| Branded or very specific sounds | `generate_sound_effect` |
+| A hosted sound that doesn't fit the tone | `generate_sound_effect` |
 
 ## Generating Sound Effects
 
 ```
 generate_sound_effect:
-  prompt: "whoosh transition sound, fast, clean, modern"
-  output_name: "sfx-whoosh"
+  prompt: "deep bass impact hit, cinematic, powerful"   # max 450 chars
+  output_name: "sfx-impact"
+  duration_seconds: 1.5    # optional, 0.5-22; omit to let the model choose
+  loop: false              # optional; true for seamless ambience
 ```
 
-The SFX file is saved to `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+The SFX file is saved to `public/sfx-impact.mp3` in the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
 ## Prompt Engineering by Category
+
+Prompts for `generate_sound_effect`. For the transition and UI rows, try the hosted file first and generate only when you need a different character.
 
 ### Transition Sounds
 
@@ -68,56 +84,20 @@ The SFX file is saved to `public/` of the directory your agent was launched from
 
 ## Timing SFX in Remotion
 
-### SFX on a Specific Frame
+Place each effect with `<Audio>` from `@remotion/media`, following the official `remotion-markup` skill (audio.md and sfx.md). Set `from` on the `<Audio>` itself to the frame of the visual event; don't wrap it in a `<Sequence>`.
 
 ```tsx
-// Play a whoosh at the exact moment a slide transition happens
-<Sequence from={3 * fps} durationInFrames={fps}>
-  <Audio src={staticFile("audio/whoosh.mp3")} volume={0.6} />
-</Sequence>
+import { Audio } from "@remotion/media";
+import { staticFile } from "remotion";
+
+// Hosted whoosh on the slide transition, generated impact just before the cut
+<Audio src="https://remotion.media/whoosh.wav" from={3 * fps} volume={0.6} />
+<Audio src={staticFile("sfx-impact.mp3")} from={sceneChangeFrame - 5} volume={0.7} />
 ```
 
-### SFX Synced to Text Appearance
-
-```tsx
-// Each text line gets a pop sound
-const textLines = ["Line One", "Line Two", "Line Three"];
-const staggerDelay = 15; // frames between each line
-
-<>
-  {textLines.map((line, i) => (
-    <Sequence key={i} from={i * staggerDelay}>
-      <Audio src={staticFile("audio/pop.mp3")} volume={0.4} />
-    </Sequence>
-  ))}
-</>
-```
-
-### Ambient Background SFX
-
-```tsx
-// City ambiance throughout the scene, fading in/out
-const frame = useCurrentFrame();
-const { durationInFrames, fps } = useVideoConfig();
-
-const ambientVolume = interpolate(
-  frame,
-  [0, fps, durationInFrames - fps, durationInFrames],
-  [0, 0.15, 0.15, 0],
-  { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-);
-
-<Audio src={staticFile("audio/city-ambiance.mp3")} volume={ambientVolume} />
-```
-
-### Impact on Scene Transition
-
-```tsx
-// Bass hit right at the scene cut
-<Sequence from={sceneChangeFrame - 5} durationInFrames={30}>
-  <Audio src={staticFile("audio/bass-impact.mp3")} volume={0.7} />
-</Sequence>
-```
+- **Synced to text appearance:** one `<Audio from={i * staggerDelay}>` per line, using the same stagger as the text animation, at 0.3-0.5.
+- **On a scene cut:** start an impact 3-5 frames before the cut so the transient lands on it.
+- **Ambient background:** `loop` plus a fade-in/fade-out `interpolate()` on `volume` (0 → 0.15 → 0), inside the scene it belongs to.
 
 ## Volume Guidelines
 
@@ -166,4 +146,5 @@ const ambientVolume = interpolate(
 5. **Fade ambient sounds** — never start or stop ambient SFX abruptly
 6. **Match the tone** — cinematic videos need cinematic SFX, not cartoon pops
 7. **Test with music** — ensure SFX and music don't clash at the same frequencies
-8. **Save with descriptive names** — `whoosh-transition.mp3` not `sfx1.mp3`
+8. **Save with descriptive names** — `output_name: "sfx-whoosh-transition"` not `"sfx1"`
+9. **Don't generate what's hosted** — check the official sfx.md list before paying for a plain whoosh or click

@@ -1,6 +1,6 @@
 ---
 name: setup
-description: First-run setup wizard for Remotion Superpowers. Checks dependencies, installs Remotion skills, walks through API key configuration, and verifies MCP server connections.
+description: First-run setup wizard for Remotion Superpowers. Checks dependencies, scaffolds a Remotion project if needed, installs and updates Remotion's 12 official Agent Skills (a required companion), walks through API key configuration, and verifies MCP server connections.
 ---
 
 # Remotion Superpowers — Setup Wizard
@@ -25,34 +25,59 @@ which uvx 2>/dev/null || echo "uvx not found"
 **Recommended:**
 - Python 3 + `uv`/`uvx` (needed for ElevenLabs and Pexels MCP servers)
   - If missing, tell user: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- whisper-cpp (`brew install whisper-cpp`) or OpenAI Whisper (`pip install openai-whisper`), needed only for `generate_subtitles` (SRT). Word-level captions use the official `remotion-captions` flow instead.
 
 Report each as ✓ or ✗ with version.
 
 ## Step 2: Check Remotion Project
 
-Check if the current directory has a `remotion.config.ts` or `remotion.config.js` file.
+Check if the current directory already has a Remotion project (a `remotion` dependency in `package.json`, usually with a `remotion.config.ts`).
 
 **If YES:** Tell the user their Remotion project was detected.
 
-**If NO:** Ask the user if they want to:
-- Create a new Remotion project here: `npx create-video@latest`
-  - Recommend: Blank template, yes to TailwindCSS, yes to install Skills
-- Or navigate to an existing Remotion project first
+**If NO:** Ask the user if they want to create one here or move to an existing project. To create one, scaffold it exactly as the official `remotion-create` skill says:
+1. Inspect the current folder first, including hidden files (`ls -la`). Files such as `.env` or `.git` count as meaningful contents; only OS metadata such as `.DS_Store` is disposable.
+2. Empty folder (or only disposable metadata, removed first):
+   ```bash
+   npx create-video@latest --yes --blank --no-tailwind .
+   npm i
+   ```
+3. Folder with meaningful contents: scaffold into a subfolder and move into it:
+   ```bash
+   npx create-video@latest --yes --blank --no-tailwind my-video
+   cd my-video
+   npm i
+   ```
 
-Do NOT proceed until the user is in a Remotion project directory.
+Don't add TailwindCSS unless the user asks for it; the official skills scaffold without it.
 
-## Step 3: Install Remotion Agent Skills
+Do NOT proceed until the user is in a Remotion project directory. If you moved into a new folder, restart the agent from there: the remotion-media tools write to `public/` of the directory the agent was launched from.
 
-Check if a `remotion-best-practices` skill is already installed (for example in `.claude/skills/`, `.agents/skills/`, `.codex/skills/` or `.gemini/skills/`).
+## Step 3: Install Remotion's Official Agent Skills (required)
 
-**If not installed:**
+Remotion Superpowers layers on top of Remotion's official Agent Skills. They're a **required companion**: this plugin generates and sources the media, and the official skills own Remotion markup, scaffolding, preview, captions and rendering. Without them the workflows have no Remotion API guidance.
+
+Check that all 12 are installed (for example in `.claude/skills/`, `.agents/skills/`, `.codex/skills/` or `.gemini/skills/`):
+
+`remotion-best-practices`, `remotion-captions`, `remotion-create`, `remotion-docs`, `remotion-interactivity`, `remotion-maps`, `remotion-markup`, `remotion-multimedia`, `remotion-render`, `remotion-saas`, `remotion-studio`, `remotion-upgrade`
+
+**If any are missing:**
 ```bash
 npx skills add remotion-dev/skills
 ```
 
-`npx skills` detects the installed agents (Claude Code, Codex, Gemini CLI, Cursor, Copilot…) and installs to each.
+`npx skills` detects the installed agents (Claude Code, Codex, Gemini CLI, Cursor, Copilot…) and installs to each. If it asks which skills to install, select all 12.
 
-Tell the user: "Remotion best practices skills installed. Your agent now knows Remotion's APIs, animation patterns, audio handling, and more."
+**Keep them current.** Remotion ships often, and the skills change with each release. From the project, run:
+```bash
+npx remotion upgrade
+```
+This upgrades Remotion and its packages and also updates the project-local Remotion skills (official `remotion-upgrade`). If `@remotion/cli` isn't installed locally, update the skills directly:
+```bash
+npx skills update remotion-best-practices remotion-captions remotion-create remotion-docs remotion-interactivity remotion-maps remotion-markup remotion-multimedia remotion-render remotion-saas remotion-studio remotion-upgrade --yes
+```
+
+Tell the user: "Remotion's official skills are installed. Your agent now knows Remotion's current APIs, preview, captions and rendering; Remotion Superpowers adds media generation on top."
 
 ## Step 4: Configure API Keys
 
@@ -142,7 +167,7 @@ Print a summary:
 
 ✓ Dependencies verified
 ✓ Remotion project detected
-✓ Remotion skills installed
+✓ Remotion official skills installed (12)
 ✓ API keys configured
 ✓ MCP servers connected
 
@@ -166,7 +191,9 @@ Print a summary:
 
 👁️ Analysis Commands:
   /analyze-footage   — Analyze existing video files with AI vision
-  /review-video      — AI feedback loop on rendered output
+  /review-video      — AI feedback loop (renders frames and the video for review)
+
+Keep Remotion and its skills current: npx remotion upgrade
 
 Try it: "Create a 30-second product demo video for a todo app"
 ```

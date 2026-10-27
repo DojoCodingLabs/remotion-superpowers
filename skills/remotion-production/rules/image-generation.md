@@ -83,89 +83,54 @@ Always match the image aspect ratio to your Remotion composition's dimensions.
 
 ## Remotion Integration
 
-### Basic Image Display
+### Where the files land
+
+- **remotion-media** `generate_image` writes `public/<output_name>.png`. Put the type in the name: `output_name: "img-hero"` becomes `staticFile("img-hero.png")`.
+- **Replicate** and **Pexels** return URLs. Download them yourself: `mkdir -p public/images && curl -L -o public/images/img-hero.png "<url>"`, then `staticFile("images/img-hero.png")`.
+
+### Placing images
+
+Add images with `<CanvasImage>` from `remotion`, as the official `remotion-markup` skill does (`<Img>` still works; both accept `effects` for grading). Sizing, dynamic paths and dimensions are in its images.md. The one recipe worth keeping here is the Ken Burns move, because it's what makes generated stills feel like footage:
 
 ```tsx
-import { Img, staticFile } from "remotion";
+import { CanvasImage, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
-<Img
-  src={staticFile("images/hero-background.png")}
-  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-/>
+export const KenBurns: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  return (
+    <CanvasImage
+      name="Hero still"
+      src={staticFile("img-hero.png")}
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        // Slow zoom + drift, inline so Studio can edit the keyframes
+        scale: interpolate(frame, [0, durationInFrames], [1, 1.15], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+          output: "perceptual-scale",
+        }),
+        translate: interpolate(frame, [0, durationInFrames], ["0% 0%", "-3% 0%"], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        }),
+      }}
+    />
+  );
+};
 ```
 
-### Ken Burns Effect (Slow Zoom + Pan)
-
-```tsx
-const frame = useCurrentFrame();
-const { durationInFrames } = useVideoConfig();
-
-const scale = interpolate(frame, [0, durationInFrames], [1, 1.15], {
-  extrapolateRight: "clamp",
-});
-const translateX = interpolate(frame, [0, durationInFrames], [0, -3], {
-  extrapolateRight: "clamp",
-});
-
-<Img
-  src={staticFile("images/landscape.png")}
-  style={{
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    transform: `scale(${scale}) translateX(${translateX}%)`,
-  }}
-/>
-```
-
-### Image Reveal with Spring
-
-```tsx
-const frame = useCurrentFrame();
-const { fps } = useVideoConfig();
-
-const scale = spring({ frame, fps, config: { damping: 200 } });
-const opacity = interpolate(frame, [0, 10], [0, 1], {
-  extrapolateRight: "clamp",
-});
-
-<Img
-  src={staticFile("images/product.png")}
-  style={{
-    transform: `scale(${scale})`,
-    opacity,
-  }}
-/>
-```
-
-### Layered Composition (Image + Text Overlay)
-
-```tsx
-<AbsoluteFill>
-  <Img
-    src={staticFile("images/background.png")}
-    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-  />
-  <div style={{
-    position: "absolute",
-    bottom: 100,
-    left: 60,
-    color: "white",
-    fontSize: 72,
-    fontWeight: "bold",
-    textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
-  }}>
-    Your Title Here
-  </div>
-</AbsoluteFill>
-```
+- Keep the zoom between 1.05 and 1.2 over the shot; more looks like a mistake.
+- Alternate direction between consecutive stills (zoom in, then out; drift left, then right).
+- For pop-in reveals and text over the image, use the recipes in `animation-presets.md` and the official timing.md.
 
 ## Best Practices
 
 1. **Match aspect ratio to composition** — generating 1:1 images for a 16:9 video wastes quality
 2. **Generate at or above target resolution** — upscaling degrades quality
-3. **Use descriptive filenames** — `hero-office-golden-hour.png` not `image1.png`
-4. **Save to `public/images/`** — keep generated images organized
+3. **Use descriptive, typed filenames** — `img-hero-office-golden-hour` not `image1`
+4. **Follow the asset convention** — `generate_image` saves to `public/img-<name>.png`; images you download (Replicate, Pexels) go to `public/images/`
 5. **Try stock first for real-world scenes** — AI still struggles with hands, text, and specific objects
 6. **Iterate on prompts** — generate 2-3 variations, pick the best one
 7. **Add Ken Burns to still images** — subtle motion makes stills feel cinematic in video

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.3.0
+
+### Changed
+- **Built on Remotion's official skills.** `remotion-dev/skills` is now the base for all Remotion markup, preview, rendering and captions. This plugin owns the media: generating, sourcing, analyzing and reviewing it. `remotion-production` says which side handles what, so the two skill sets no longer give conflicting instructions (e.g. the official voiceover guide asking for an ElevenLabs key that KIE already covers).
+- **Preview first.** `/create-video` and `/create-short` open Remotion Studio as soon as the project runs and build live. They render when you ask; `/review-video` renders on invocation and checks a few frames before the full TwelveLabs review.
+- **Captions use the official flow.** Word-level transcription and `<BasicCaptions>` per clip, with our TikTok-style presets and short-form placement on top. `generate_subtitles` stays for SRT export.
+- `/setup` installs all 12 official Remotion skills and scaffolds with the official `create-video` flags.
+
+### Fixed
+- Outdated Remotion APIs across the rules and skills: `<OffthreadVideo>`, `<Audio>` from `remotion`, `startFrom`/`endAt`, `<Loop>`, `@remotion/light-leaks`, `npm run dev` / `localhost:3000` → `@remotion/media`, `trimBefore`/`trimAfter`, `loop`, `@remotion/effects`, `npx remotion studio`.
+- Word-by-word caption highlight couldn't work from line-level SRT; caption spans used CSS transitions, which don't render.
+- Glitch effect used `Math.random()` (flickers across render threads); non-integer `durationInFrames`.
+- ElevenLabs MCP tool names (`voice_clone`, `search_voices`, `isolate_audio`) and its `~/Desktop` default output.
+- `generate_speech` doesn't return a duration; durations are now measured in `calculateMetadata`.
+- One asset naming convention for MCP outputs and downloads.
+
+### Removed
+- `rules/3d-content.md` (superseded by the official `remotion-markup` 3D guide).
+
+### Added
+- CI guard against outdated Remotion APIs in the docs.
+
 ## 2.2.0
 
 ### Added

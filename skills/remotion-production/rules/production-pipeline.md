@@ -1,57 +1,79 @@
-# Production Pipeline — End-to-End Workflow
+# Production Pipeline — Order of MCP Steps
 
 ## Overview
 
-The full pipeline from user prompt to rendered MP4. Follow this order — each step builds on the previous.
+The order in which to generate and source media, layered on top of the official Remotion flow. Remotion-specific steps (scaffolding, Studio, markup, rendering) follow the official skills; this file only says **when** each one happens relative to the MCP calls.
 
-## Step 1: Concept Breakdown
+## Step 1: Scaffold or Detect the Project
+
+If a Remotion project already exists (a `remotion` dependency in `package.json`), use it. Otherwise scaffold one exactly as the official `remotion-create` skill says.
+
+Start the agent from the Remotion project root: remotion-media tools write to `public/` of the directory the agent was launched from.
+
+If the code uses `<Audio>` or `<Video>`, install `@remotion/media` now: `npx remotion add @remotion/media`.
+
+## Step 2: Start Studio (preview first)
+
+As soon as the project can run, start Studio, before building any scenes, and keep it open for the rest of the session:
+
+```bash
+npx remotion studio            # opens the browser itself
+npx remotion studio --no-open  # with an in-app browser: open the URL it prints
+```
+
+Open the exact URL Studio prints (it picks a free port), then `/<composition-id>` once a composition exists. Options and edge cases: official `remotion-best-practices` ("Open the preview") and `remotion-studio`.
+
+## Step 3: Concept Breakdown and Approval Gate
 
 When the user describes a video, break it down into:
 
 - **Duration** — How long is the video? (default: 30 seconds if not specified)
-- **Scenes** — List of visual scenes with approximate timestamps
-- **Script** — Narration text (if voiceover is needed)
+- **Scenes** — List of visual scenes, each with its own narration line
+- **Script** — Narration text per scene (if voiceover is needed)
 - **Audio needs** — Music genre/mood, sound effects, voiceover style
 - **Visual style** — Color scheme, typography, animation style
 - **Assets needed** — Stock footage queries, images to generate, existing footage to analyze
 
-Present this breakdown to the user for approval before proceeding.
+Present this breakdown to the user and **wait for approval** before calling any paid generation tool.
 
-## Step 2: Generate Voiceover (if needed)
+## Step 4: Per-Scene Voiceover (if needed)
 
-Voiceover drives the timing of everything else. Generate it first.
+Voiceover drives the timing of everything else. Generate one file per scene:
 
 ```
-Use remotion-media's generate_speech tool:
-- text: the narration script
-- output_name: filename without extension (e.g., "narration-intro")
+Use remotion-media's generate_speech tool, once per scene:
+- text: that scene's narration
+- output_name: "vo-scene1", "vo-scene2", ...
 - voice: choose appropriate voice (default: "Eric" for male, "Rachel" for female)
 ```
 
-The tool saves the audio to `public/` of the directory your agent was launched from (so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root) and returns the file path and duration.
+The tool returns the file path only, not a duration. Durations are measured later in `calculateMetadata` (Step 7). Details: `voiceover-sync.md`.
 
-**Record the duration** — this determines the composition length.
+## Step 5: Music, then SFX
 
-## Step 3: Generate Music
-
+### Music
 ```
 Use remotion-media's generate_music tool:
 - prompt: describe the mood/genre (e.g., "upbeat corporate background music, no vocals")
-- output_name: filename without extension (e.g., "music-background")
+- output_name: "music-bg"
+- instrumental: true
 ```
 
-Music should be slightly longer than the video — it can be trimmed in the composition.
+Music can be longer than the video (it is cut at the composition end) or shorter (use `loop`). Details: `music-scoring.md`.
 
-## Step 4: Generate Sound Effects (if needed)
+### Sound Effects (if needed)
+Use the free hosted SFX from the official `remotion-markup` skill (sfx.md) for generic sounds (whoosh, click, ding, shutter…). Generate only custom ones:
 
 ```
 Use remotion-media's generate_sound_effect tool:
-- prompt: describe the sound (e.g., "whoosh transition sound", "notification chime")
-- output_name: filename without extension (e.g., "sfx-whoosh")
-- duration_seconds: how long the effect should be
+- prompt: describe the sound (e.g., "deep cinematic boom with long reverb tail")
+- output_name: "sfx-boom"
+- duration_seconds: how long the effect should be (0.5-22)
 ```
 
-## Step 5: Source Visual Assets
+Details: `sound-effects.md`.
+
+## Step 6: Footage and Images
 
 ### Stock Footage (Pexels)
 For each scene that needs stock footage:
@@ -62,10 +84,13 @@ Use Pexels videos_search tool:
 - size: "large"
 ```
 
-Download selected videos using curl to `public/footage/`:
+Download the chosen file into `public/footage/`:
 ```bash
-curl -o public/footage/scene1.mp4 "VIDEO_URL"
+mkdir -p public/footage
+curl -L -o public/footage/city-skyline.mp4 "VIDEO_URL"
 ```
+
+Pexels doesn't require attribution, but it's appreciated. Details: `stock-footage-workflow.md`.
 
 ### Existing Footage Analysis (TwelveLabs)
 If the user has video files in the project:
@@ -76,99 +101,61 @@ Use TwelveLabs to:
 3. Get timestamps for relevant scenes
 ```
 
-### Generated Images
+Details: `video-analysis.md`.
+
+### Generated Images and Clips
 ```
 Use remotion-media's generate_image tool:
 - prompt: describe the image
-- output_name: filename without extension (e.g., "image-scene1")
+- output_name: "img-scene1"
 ```
 
-## Step 6: Create the Remotion Composition
+For AI clips use `generate_video_from_text` / `generate_video_from_image` with `output_name: "clip-<name>"`. Details: `image-generation.md`, `video-generation.md`.
 
-Now write the React code. Use the Remotion best practices skill for component patterns.
+## Step 7: Build the Scenes
 
-### Set up the composition in `src/Root.tsx`:
-```tsx
-import { Composition } from "remotion";
-import { MyVideo } from "./MyVideo";
+Write the markup following the official `remotion-markup` skill (compositions, multi-scene video, audio, timing props). Studio is already open, so the user sees each scene land.
 
-export const RemotionRoot: React.FC = () => {
-  return (
-    <Composition
-      id="MyVideo"
-      component={MyVideo}
-      durationInFrames={VOICEOVER_DURATION_SECONDS * 30}
-      fps={30}
-      width={1920}
-      height={1080}
-    />
-  );
-};
-```
+Size the composition from the voiceover: measure every `vo-sceneN.mp3` in `calculateMetadata` with Mediabunny (official `remotion-multimedia`, get-audio-duration.md), convert with `Math.ceil(seconds * fps)`, and pass the per-scene frame counts as props. Never hard-code a duration computed from seconds. The full pattern is in `voiceover-sync.md`.
 
-### Layer the composition:
-1. **Background layer** — Stock footage or solid color
-2. **Visual elements** — Text, images, animations
-3. **Voiceover layer** — `<Audio src={staticFile("voiceover.mp3")} />`
-4. **Music layer** — `<Audio src={staticFile("music.mp3")} volume={0.3} />`
-5. **SFX layer** — `<Audio>` components at specific frames
+Audio layers and ducking: `audio-integration.md`. Asset paths: `asset-management.md`.
 
-## Step 7: Preview
+## Step 8: Iterate in Studio
 
-```bash
-npm run dev
-```
-
-Open http://localhost:3000 to preview. Check:
+Ask the user to watch the preview in Studio and check:
 - Audio sync with visuals
 - Timing of scene transitions
 - Text readability
 - Overall feel
 
-## Step 8: Iterate
+Adjust animation timing, volumes, transitions or text, or regenerate an asset with a new prompt. Keep any edits the user made to the code between turns.
 
-Make adjustments based on preview:
-- Adjust animation timing
-- Change audio volumes
-- Tweak transitions
-- Fix text positioning
+## Step 9: Render Only When Asked
 
-## Step 9: Render
+Don't render by default. Render only when the user explicitly asks for an MP4 ("render it", "export", "give me the MP4"), following the official `remotion-render` skill, or point them to the render button in Studio.
 
-```bash
-npx remotion render MyVideo out/video.mp4
-```
-
-Or with custom settings:
-```bash
-npx remotion render MyVideo out/video.mp4 --codec h264 --crf 18
-```
+After a render, offer the `review-video` skill for an AI review of the result (invoking `review-video` counts as an explicit request to render).
 
 ## File Organization
 
 ```
 project/
 ├── public/
-│   ├── audio/
-│   │   ├── voiceover.mp3
-│   │   ├── music.mp3
-│   │   └── sfx-whoosh.mp3
-│   ├── footage/
-│   │   ├── scene1.mp4
-│   │   └── scene2.mp4
+│   ├── vo-scene1.mp3          # remotion-media writes to the public/ root
+│   ├── vo-scene2.mp3
+│   ├── music-bg.mp3
+│   ├── sfx-boom.mp3
+│   ├── img-scene1.png
+│   ├── clip-city.mp4
+│   ├── footage/               # files you download yourself (Pexels, Replicate)
+│   │   └── city-skyline.mp4
 │   └── images/
-│       ├── hero.png
 │       └── logo.png
 ├── src/
 │   ├── Root.tsx
 │   ├── MyVideo.tsx
-│   ├── scenes/
-│   │   ├── Intro.tsx
-│   │   ├── Scene1.tsx
-│   │   └── Outro.tsx
-│   └── components/
-│       ├── AnimatedText.tsx
-│       └── AudioLayer.tsx
-└── out/
-    └── video.mp4
+│   └── scenes/
+└── out/                       # only after an explicit render
 ```
+
+See `asset-management.md` for naming and `staticFile()` paths.

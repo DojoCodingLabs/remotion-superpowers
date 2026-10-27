@@ -63,39 +63,33 @@ Recommended clips for a 30-second promo:
 
 ### Step 4: Use Clips in Remotion
 
-With timestamps identified, use `OffthreadVideo` with `startFrom` and `endAt`:
+Turn each recommended range into a clip: `trimBefore` is the start timestamp and `durationInFrames` is the clip length, both in frames. Place them with `<Video>` from `@remotion/media` on a `TransitionSeries` (adjacent cuts) or a named `Track` (independent start times), following the official `remotion-markup` skill (video-editing.md, timing-props.md).
 
 ```tsx
-import { OffthreadVideo, Sequence, staticFile, useVideoConfig } from "remotion";
+import { Video } from "@remotion/media";
+import { TransitionSeries } from "@remotion/transitions";
+import { staticFile, useVideoConfig } from "remotion";
 
 export const EditedVideo: React.FC = () => {
   const { fps } = useVideoConfig();
 
   return (
-    <>
+    <TransitionSeries name="Promo cuts">
       {/* Speaker intro: 0:15-0:25 of source */}
-      <Sequence from={0} durationInFrames={10 * fps}>
-        <OffthreadVideo
-          src={staticFile("footage/source-video.mp4")}
-          startFrom={15 * fps}
-          endAt={25 * fps}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </Sequence>
+      <TransitionSeries.Sequence name="Speaker intro" trimBefore={15 * fps} durationInFrames={10 * fps}>
+        <Video name="Speaker footage" src={staticFile("footage/source-video.mp4")} objectFit="cover" />
+      </TransitionSeries.Sequence>
 
       {/* Product demo: 0:45-1:20 of source */}
-      <Sequence from={10 * fps} durationInFrames={35 * fps}>
-        <OffthreadVideo
-          src={staticFile("footage/source-video.mp4")}
-          startFrom={45 * fps}
-          endAt={80 * fps}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </Sequence>
-    </>
+      <TransitionSeries.Sequence name="Product demo" trimBefore={45 * fps} durationInFrames={35 * fps}>
+        <Video name="Demo footage" src={staticFile("footage/source-video.mp4")} objectFit="cover" />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   );
 };
 ```
+
+TwelveLabs timestamps are often fractional seconds. Convert them with `Math.round(12.4 * fps)` so every timing prop is an integer frame count.
 
 ## Use Cases
 
@@ -121,7 +115,7 @@ export const EditedVideo: React.FC = () => {
 
 ## Best Practices
 
-1. **Copy source videos to `public/`** — Remotion needs them accessible via `staticFile()`
+1. **Copy source videos to `public/footage/`** — Remotion needs them accessible via `staticFile("footage/<name>.mp4")`
 2. **Index once, query many times** — TwelveLabs indexes are reusable
 3. **Be specific in searches** — "person presenting with slides" beats "presentation"
 4. **Verify timestamps** — preview clips before building the full composition

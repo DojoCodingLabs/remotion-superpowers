@@ -4,16 +4,20 @@
 
 The ElevenLabs MCP server provides advanced voice features beyond basic TTS: voice cloning, custom voice parameters, voice library browsing, and audio isolation. Use this when you need more control than remotion-media's `generate_speech` provides.
 
+## Output Location (read first)
+
+ElevenLabs MCP tools that write files (`text_to_speech`, `isolate_audio`, …) save to `~/Desktop` unless you pass `output_directory`. **Always set `output_directory` to the absolute path of the project's `public/` folder**, e.g. `"/path/to/project/public"`. The tools pick their own filenames, so rename the result to the project convention right after (`mv public/<returned-name>.mp3 public/vo-scene1.mp3`).
+
 ## When to Use ElevenLabs MCP vs remotion-media
 
 | Scenario | Use | Why |
 |---|---|---|
-| Basic narration, any voice | remotion-media `generate_speech` | Simpler, auto-saves to project |
+| Basic narration, any of the 21 built-in voices | remotion-media `generate_speech` | Simpler, saves straight to `public/`, no ElevenLabs key |
 | Specific ElevenLabs voice ID | ElevenLabs MCP | Direct voice selection |
 | Voice cloning from sample | ElevenLabs MCP | Only way to clone voices |
-| Custom stability/style params | ElevenLabs MCP | Fine-tuned control |
+| `style`, speaker boost, `eleven_v3` model | ElevenLabs MCP | `generate_speech` exposes only stability, similarity and speed |
 | Multiple voices in one script | ElevenLabs MCP | Per-line voice switching |
-| Voice library browsing | ElevenLabs MCP | Discover community voices |
+| Voice library browsing | ElevenLabs MCP | Your voices (`search_voices`) or community voices (`search_voice_library`) |
 | Audio isolation | ElevenLabs MCP | Extract voice from noisy audio |
 
 ## Voice Cloning Workflow
@@ -29,28 +33,27 @@ Requirements for good clones:
 ### 2. Create the Clone
 
 ```
-Use ElevenLabs add_voice:
+Use ElevenLabs voice_clone:
   name: "Brand Voice"
   files: ["/path/to/sample.mp3"]
   description: "Company brand narrator voice"
 ```
 
+It returns the new voice's ID. Cloning costs credits: only run it when the user asks.
+
 ### 3. Generate with Cloned Voice
 
 ```
 Use ElevenLabs text_to_speech:
-  text: "Welcome to our product demo."
+  text: "Welcome to our product demo."   # one scene per call
   voice_id: "[returned_voice_id]"
   model_id: "eleven_multilingual_v2"
+  output_directory: "/absolute/path/to/project/public"
 ```
 
-### 4. Save to Remotion Project
+### 4. Wire into the Remotion Project
 
-Download the generated audio to your project's `public/audio/` directory, then reference it:
-
-```tsx
-<Audio src={staticFile("audio/brand-narration.mp3")} volume={1.0} />
-```
+Rename the file to `public/vo-scene1.mp3` (and so on per scene). From here it's the same as a `generate_speech` file: measure it in `calculateMetadata` and place it with `<Audio>` from `@remotion/media`, as in `voiceover-sync.md`.
 
 ## TTS Parameters
 
@@ -76,11 +79,12 @@ Amplifies the voice's speaking style:
 - **0.2–0.5**: Moderate style (recommended)
 - **0.5+**: Strong stylistic expression, may reduce stability
 
-### Speed (0.5 – 2.0)
+### Speed (0.7 – 1.2)
 
+Both ElevenLabs `text_to_speech` and remotion-media `generate_speech` accept 0.7–1.2; extreme values can hurt quality.
 - **0.7–0.8**: Slow, deliberate (good for explainers)
 - **1.0**: Normal speed (default)
-- **1.2–1.3**: Slightly faster (good for social media)
+- **1.1–1.2**: Slightly faster (good for social media)
 
 ### Recommended Presets
 
@@ -96,38 +100,26 @@ Amplifies the voice's speaking style:
 
 For videos with multiple speakers (interviews, dialogues, characters):
 
-```tsx
-// Generate each voice separately
-// Voice A: narrator
-// Voice B: interviewer
-// Voice C: interviewee
+1. Generate one file per line with that speaker's voice: `vo-line01-narrator`, `vo-line02-interviewer`, `vo-line03-guest`, … (built-in voices via `generate_speech`, cloned or library voices via `text_to_speech` with `output_directory` set to `public/`).
+2. Measure every line in `calculateMetadata` and compute each line's start frame as the running sum of the previous lines (plus a small gap), exactly like the per-scene pattern in `voiceover-sync.md`.
+3. Place each line with `<Audio>` from `@remotion/media`, with `from` set to its start frame directly on the `<Audio>` (official `remotion-markup` audio.md, "Delaying").
 
-<>
-  <Sequence from={0} durationInFrames={3 * fps}>
-    <Audio src={staticFile("audio/narrator-intro.mp3")} volume={1.0} />
-  </Sequence>
-
-  <Sequence from={3 * fps} durationInFrames={4 * fps}>
-    <Audio src={staticFile("audio/interviewer-q1.mp3")} volume={1.0} />
-  </Sequence>
-
-  <Sequence from={7 * fps} durationInFrames={6 * fps}>
-    <Audio src={staticFile("audio/interviewee-a1.mp3")} volume={1.0} />
-  </Sequence>
-</>
-```
-
-Generate each line with its corresponding voice ID, then sequence them in Remotion.
+Keep a table of speaker → voice ID in the project so lines can be regenerated consistently.
 
 ## Voice Library
 
-Browse and use community-created voices:
+Find a voice, then pass its ID to `text_to_speech`:
 
 ```
-Use ElevenLabs get_voices
+Use ElevenLabs search_voices:          # voices already in the user's account
+  search: "narrator"
+
+Use ElevenLabs search_voice_library:   # the shared community library
+  search: "deep british documentary"
+  page_size: 10
 ```
 
-This returns available voices with their IDs, names, and descriptions. Filter by:
+Both return voices with their IDs, names, and descriptions. Put the filter in the `search` text, e.g.:
 - **Category**: narration, conversational, characters, news
 - **Language**: English, Spanish, French, etc.
 - **Gender**: male, female
@@ -138,9 +130,12 @@ This returns available voices with their IDs, names, and descriptions. Filter by
 Extract clean voice from noisy recordings:
 
 ```
-Use ElevenLabs audio_isolation:
-  audio_url: "[url_to_noisy_audio]"
+Use ElevenLabs isolate_audio:
+  input_file_path: "/absolute/path/to/noisy-sample.mp3"   # a local file, not a URL
+  output_directory: "/absolute/path/to/project/public"
 ```
+
+Rename the result to the project convention (e.g. `vo-sample-clean.mp3`).
 
 Useful when:
 - User provides a reference voice sample with background noise
@@ -153,7 +148,8 @@ Useful when:
 2. **Use ElevenLabs MCP** when you need voice cloning, custom params, or multi-voice
 3. **Test voice clones with short text first** before generating full narration
 4. **Keep stability at 0.5-0.7** for professional narration
-5. **Generate one sentence at a time** for multi-voice scripts, then sequence in Remotion
-6. **Save voice IDs** — note which voice ID was used so you can regenerate consistently
-7. **Respect voice cloning ethics** — only clone voices you have permission to use
-8. **Use `eleven_multilingual_v2`** model for best quality across languages
+5. **Always pass `output_directory`** — otherwise files land on `~/Desktop`, outside the project
+6. **Generate one sentence at a time** for multi-voice scripts, then sequence in Remotion
+7. **Save voice IDs** — note which voice ID was used so you can regenerate consistently
+8. **Respect voice cloning ethics** — only clone voices you have permission to use
+9. **Use `eleven_multilingual_v2`** model for best quality across languages

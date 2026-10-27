@@ -95,22 +95,30 @@ Based on the analysis, recommend the best clips for the user's video:
 
 ### 6. Show Usage in Remotion
 
-For each recommended clip, show the Remotion code:
+For each recommended clip, show the Remotion code. A source range becomes `trimBefore` (the start timestamp) plus `durationInFrames` (the clip length) on `<Video>` from `@remotion/media`. Cut the clips together with `TransitionSeries` or a `Track` as the official `remotion-markup` skill shows (video-editing.md); `skills/remotion-production/rules/video-analysis.md` has a full example.
 
 ```tsx
-<Sequence from={0} durationInFrames={5 * fps}>
-  <OffthreadVideo
-    src={staticFile("footage/source-video.mp4")}
-    startFrom={45 * fps}
-    endAt={50 * fps}
-    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-  />
-</Sequence>
+import { Video } from "@remotion/media";
+import { staticFile, useVideoConfig } from "remotion";
+
+const { fps } = useVideoConfig();
+
+// Opening (0:00-0:05) ← source 0:45-0:50
+<Video
+  name="Opening"
+  src={staticFile("footage/source-video.mp4")}
+  trimBefore={45 * fps}
+  durationInFrames={5 * fps}
+  objectFit="cover"
+  style={{ width: "100%", height: "100%" }}
+/>
 ```
+
+Round fractional TwelveLabs timestamps to whole frames: `Math.round(45.6 * fps)`.
 
 ## Tips
 
-- Ensure video files are in `public/` so Remotion can access them via `staticFile()`
+- Ensure video files are in `public/` (ideally `public/footage/`) so Remotion can access them via `staticFile()` with the path relative to `public/`
 - For very long videos (>30 min), indexing may take 10+ minutes
 - TwelveLabs indexes are reusable — index once, search many times
 - Combine analyzed footage with stock clips from Pexels to fill gaps

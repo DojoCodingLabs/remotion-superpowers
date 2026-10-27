@@ -77,7 +77,8 @@ replicate_create_prediction:
 
 Poll with `replicate_get_prediction` until status is `succeeded`, then download the output:
 ```bash
-curl -o public/footage/[descriptive-name].mp4 "[replicate_output_url]"
+mkdir -p public/footage
+curl -L -o public/footage/clip-[descriptive-name].mp4 "[replicate_output_url]"
 ```
 
 **Model recommendations:**
@@ -90,23 +91,24 @@ See `skills/remotion-production/rules/replicate-models.md` and `rules/video-gene
 
 ### 5. Show Usage in Remotion
 
+Place the clip with `<Video>` from `@remotion/media` (`npx remotion add @remotion/media`). Trimming, looping, volume and cutting several clips together follow the official `remotion-markup` skill (embedding-videos.md, video-editing.md). The path is what changes per provider: remotion-media clips are at `public/<output_name>.mp4`, Replicate downloads at `public/footage/`.
+
 ```tsx
-import { OffthreadVideo, staticFile } from "remotion";
+import { Video } from "@remotion/media";
+import { staticFile, useVideoConfig } from "remotion";
 
-// Full-scene background clip
-<OffthreadVideo
-  src={staticFile("footage/ai-clip.mp4")}
-  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+const { fps } = useVideoConfig();
+
+// remotion-media clip, trimmed to 3 s and starting 5 s into the scene
+<Video
+  src={staticFile("clip-city-aerial.mp4")}
+  from={5 * fps}
+  trimBefore={1 * fps}
+  durationInFrames={3 * fps}
+  muted
+  objectFit="cover"
+  style={{ width: "100%", height: "100%" }}
 />
-
-// Trimmed clip in a sequence
-<Sequence from={5 * fps} durationInFrames={3 * fps}>
-  <OffthreadVideo
-    src={staticFile("footage/ai-clip.mp4")}
-    startFrom={0}
-    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-  />
-</Sequence>
 ```
 
 ### 6. Combine with Other Assets

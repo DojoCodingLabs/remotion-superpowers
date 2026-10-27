@@ -52,6 +52,8 @@ Ask which ones they want to download.
 
 ### 4. Download Selected Assets
 
+The Pexels MCP has no download tool. Get the file URL with `video_get` (or from the search result's `video_files`, picking the `hd` entry closest to the composition size), then:
+
 ```bash
 mkdir -p public/footage  # or public/images for photos
 
@@ -61,19 +63,22 @@ curl -L -o public/footage/[descriptive-name].mp4 "[video_url]"
 
 ### 5. Show Usage
 
-After downloading, show how to use the clip in Remotion:
+After downloading, show how to use the clip in Remotion. `<Video>` comes from `@remotion/media` (`npx remotion add @remotion/media`); trimming, volume and effects follow the official `remotion-markup` skill (embedding-videos.md).
 
 ```tsx
-import { OffthreadVideo, staticFile } from "remotion";
+import { Video } from "@remotion/media";
+import { staticFile } from "remotion";
 
-<OffthreadVideo
+<Video
   src={staticFile("footage/[descriptive-name].mp4")}
-  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+  muted
+  objectFit="cover"
+  style={{ width: "100%", height: "100%" }}
 />
 ```
 
 ### 6. Attribution Reminder
 
 Remind the user:
-> Pexels content is free to use. Attribution is appreciated but not required.
-> Consider adding "Videos provided by Pexels" in your video credits.
+> Pexels doesn't require attribution, but it's appreciated.
+> Consider adding "Videos provided by Pexels" and the creator's name to your video credits or description.

@@ -47,10 +47,10 @@
 
   ✓ script & scene plan       ✓ voiceover (ElevenLabs)     ✓ jazz track (Suno)
   ✓ city footage (Pexels)     ✓ captions (Whisper)         ✓ transitions
-  ✓ render → out/video.mp4    ✓ AI review → fixes → re-render
+  ✓ live preview in Studio   ✓ render → out/video.mp4     ✓ AI review → fixes
 ```
 
-Remotion turns React into video. **Remotion Superpowers** gives your agent everything else a video needs. It can **see** (video analysis), **speak** (voiceovers), **hear** (music and SFX), **source** (stock footage and AI generation), **caption**, **transition**, and **review** its own render, then fix it.
+Remotion turns React into video, and [Remotion's official Agent Skills](https://www.remotion.dev/docs/ai/skills) teach your agent how to write it. **Remotion Superpowers** layers on top and gives your agent everything else a video needs. It can **see** (video analysis), **speak** (voiceovers), **hear** (music and SFX), **source** (stock footage and AI generation), **caption**, **transition**, and **review** its own render, then fix it.
 
 ## Install
 
@@ -61,7 +61,7 @@ Remotion turns React into video. **Remotion Superpowers** gives your agent every
 | [Gemini CLI](#gemini-cli) | `gemini extensions install https://github.com/DojoCodingLabs/remotion-superpowers` |
 | [Cursor, Copilot, others](#cursor-github-copilot-and-other-agents) | `npx skills add DojoCodingLabs/remotion-superpowers` |
 
-**Requires** [Node.js](https://nodejs.org) 18+ and [uv](https://astral.sh/uv) (the MCP servers run through `npx` and `uvx`).
+**Requires** [Node.js](https://nodejs.org) 18+ and [uv](https://astral.sh/uv) (the MCP servers run through `npx` and `uvx`), plus Remotion's official skills, which `/setup` installs for you (or run `npx skills add remotion-dev/skills`).
 
 ### Claude Code
 
@@ -98,6 +98,8 @@ npx skills add DojoCodingLabs/remotion-superpowers
 This installs the 15 skills into every agent it detects. Then add the servers from [`.mcp.json`](.mcp.json) to your agent's MCP config and set the keys listed under each server's `env_vars`.
 
 > [!NOTE]
+> **Built on Remotion's official skills.** They own the Remotion markup, preview and render; this plugin owns the media: generating, sourcing, analyzing and reviewing it. When both are installed, each sticks to its part.
+>
 > Skills and MCP servers work in every agent above. The 3 subagents in `agents/` and the hooks (API-key guard, captions tip) are Claude Code extras.
 
 <details>
@@ -130,13 +132,13 @@ Run `bash scripts/ci/validate.sh` before opening a PR. CI runs the same checks.
 
 ## Quick start
 
-**1. Set up.** Run `/setup` to check dependencies, create or detect a Remotion project, install Remotion's own skills, configure API keys, and verify the MCP servers.
+**1. Set up.** Run `/setup` to check dependencies, create or detect a Remotion project, install Remotion's official skills, configure API keys, and verify the MCP servers.
 
-**2. Make a video.** Run `/create-video`, or just describe it:
+**2. Make a video.** Run `/create-video`, or just describe it. Remotion Studio opens right away, so you can watch the video come together and steer:
 
 > "Create a 30-second promo video for a coffee shop. Include drone footage of a city, a warm voiceover, background jazz music, and animated text overlays with the shop's name and address."
 
-**3. Make it better.** Run `/review-video`. The agent watches the render, lists what to fix, fixes it, and re-renders.
+**3. Render and make it better.** Ask for the MP4 when you're happy, or run `/review-video`: the agent renders, watches the result, lists what to fix, fixes it, and re-renders.
 
 > [!TIP]
 > Start your agent from the Remotion project root. Generated audio, images and clips land in that directory's `public/`.
@@ -153,12 +155,12 @@ Run `bash scripts/ci/validate.sh` before opening a PR. CI runs the same checks.
 | 🎬 | AI video clips, text-to-video and image-to-video | KIE + Replicate (Veo 3.1, Wan, Kling) |
 | 👁️ | Video understanding: find scenes, objects, timestamps | TwelveLabs |
 | 🔄 | AI review of your render, with fixes | TwelveLabs |
-| 📝 | TikTok-style word-by-word captions | Whisper (local) + `@remotion/captions` |
-| 🎯 | Scene transitions: fade, slide, wipe, flip, clock-wipe | `@remotion/transitions` |
+| 📝 | TikTok-style word-by-word captions | Whisper (local) + Remotion's official captions flow |
+| 🎯 | Scene transitions: fade, slide, wipe, flip, clock-wipe | `@remotion/transitions` (official skills) |
 | 📱 | 9:16 short-form pipeline for TikTok, Reels, Shorts | Built-in presets |
-| 🎲 | 3D scenes and product showcases | `@remotion/three` |
+| 🎲 | 3D scenes and product showcases | `@remotion/three` (official skills) |
 | 📊 | Animated charts, dashboards, counters | SVG + D3 |
-| ✨ | Film grain, vignettes, Ken Burns, Lottie | `@remotion/light-leaks` + CSS |
+| ✨ | Light leaks, film grain, vignettes, color grading, Lottie | `@remotion/effects` (official skills) |
 | 🚀 | Render on PR or on demand | GitHub Actions |
 
 ## Commands
@@ -186,16 +188,16 @@ In Claude Code these are slash commands. In Codex, Gemini CLI and other agents t
 ```text
 Your prompt → /create-video (or /create-short)
     │
-    ├── 1. Concept    → break into scenes, script, audio needs
-    ├── 2. Script     → narration text + timing
-    ├── 3. Voiceover  → TTS audio (remotion-media / ElevenLabs)
+    ├── 1. Studio     → Remotion Studio opens as soon as the project runs; watch it build
+    ├── 2. Concept    → scenes, script, audio needs → you approve the plan
+    ├── 3. Voiceover  → per-scene TTS (remotion-media / ElevenLabs), measured for timing
     ├── 4. Music      → background track (Suno via remotion-media)
-    ├── 5. Footage    → Pexels / AI generation / TwelveLabs analysis
-    ├── 6. Visuals    → Remotion React components + transitions + effects
-    ├── 7. Captions   → TikTok-style animated subtitles
-    ├── 8. Compose    → wire every asset into the composition
-    ├── 9. Preview    → npm run dev
-    ├── 10. Render    → npx remotion render → MP4
+    ├── 5. SFX        → hosted or generated sound effects
+    ├── 6. Footage    → Pexels / AI images and clips / TwelveLabs analysis
+    ├── 7. Visuals    → Remotion markup via the official skills: scenes, transitions, effects
+    ├── 8. Captions   → word-level, TikTok-style
+    ├── 9. Iterate    → tweak live in Studio
+    ├── 10. Render    → when you ask: npx remotion render → MP4
     └── 11. Review    → /review-video → AI watches, suggests, iterates
 ```
 
@@ -272,7 +274,7 @@ remotion-superpowers/
 │   ├── add-voiceover/  add-music/  transcribe/
 │   ├── add-captions/  add-transitions/
 │   ├── analyze-footage/  review-video/
-│   ├── remotion-production/      # production workflow knowledge (18 rules)
+│   ├── remotion-production/      # media orchestration (17 rules), on top of Remotion's official skills
 │   └── setup-guide/              # setup & troubleshooting knowledge
 ├── agents/                       # 3 Claude Code subagents
 ├── hooks/hooks.json              # Claude Code hooks (API key checks, tips)
