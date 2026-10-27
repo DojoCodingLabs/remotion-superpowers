@@ -2,17 +2,17 @@
 
 ## Generating Voiceover
 
-Use `remotion-media`'s `generate_tts` tool:
+Use `remotion-media`'s `generate_speech` tool:
 
 ```
-generate_tts:
+generate_speech:
   text: "Your narration script here"
+  output_name: "narration-intro"
   voice: "Eric"  # or Rachel, Aria, Roger, Sarah, Laura, Charlie, George, etc.
-  project_path: "/path/to/remotion/project"
 ```
 
 The tool returns:
-- File path (saved to `public/` directory)
+- File path (saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root)
 - Duration in seconds
 
 ## Voice Selection Guide
@@ -53,8 +53,7 @@ Generate subtitles from the voiceover audio:
 
 ```
 Use remotion-media's generate_subtitles tool:
-  input: "public/audio/voiceover.mp3"
-  project_path: "/path/to/project"
+  input_file: "narration-intro.mp3"  # filename inside public/
 ```
 
 This creates an SRT file. Use Remotion's caption system to display them:

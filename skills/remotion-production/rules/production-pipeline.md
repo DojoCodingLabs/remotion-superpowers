@@ -22,13 +22,13 @@ Present this breakdown to the user for approval before proceeding.
 Voiceover drives the timing of everything else. Generate it first.
 
 ```
-Use remotion-media's generate_tts tool:
+Use remotion-media's generate_speech tool:
 - text: the narration script
+- output_name: filename without extension (e.g., "narration-intro")
 - voice: choose appropriate voice (default: "Eric" for male, "Rachel" for female)
-- project_path: path to the Remotion project root
 ```
 
-The tool saves the audio to `public/` and returns the file path and duration.
+The tool saves the audio to `public/` of the directory Claude Code was launched from (so start Claude Code from the Remotion project root) and returns the file path and duration.
 
 **Record the duration** — this determines the composition length.
 
@@ -37,8 +37,7 @@ The tool saves the audio to `public/` and returns the file path and duration.
 ```
 Use remotion-media's generate_music tool:
 - prompt: describe the mood/genre (e.g., "upbeat corporate background music, no vocals")
-- duration: match or exceed the voiceover duration
-- project_path: path to the Remotion project root
+- output_name: filename without extension (e.g., "music-background")
 ```
 
 Music should be slightly longer than the video — it can be trimmed in the composition.
@@ -46,10 +45,10 @@ Music should be slightly longer than the video — it can be trimmed in the comp
 ## Step 4: Generate Sound Effects (if needed)
 
 ```
-Use remotion-media's generate_sfx tool:
-- text: describe the sound (e.g., "whoosh transition sound", "notification chime")
+Use remotion-media's generate_sound_effect tool:
+- prompt: describe the sound (e.g., "whoosh transition sound", "notification chime")
+- output_name: filename without extension (e.g., "sfx-whoosh")
 - duration_seconds: how long the effect should be
-- project_path: path to the Remotion project root
 ```
 
 ## Step 5: Source Visual Assets
@@ -57,7 +56,7 @@ Use remotion-media's generate_sfx tool:
 ### Stock Footage (Pexels)
 For each scene that needs stock footage:
 ```
-Use Pexels searchVideos tool:
+Use Pexels videos_search tool:
 - query: descriptive keywords (e.g., "drone footage city skyline sunset")
 - orientation: "landscape" for standard video
 - size: "large"
@@ -81,7 +80,7 @@ Use TwelveLabs to:
 ```
 Use remotion-media's generate_image tool:
 - prompt: describe the image
-- project_path: path to the Remotion project root
+- output_name: filename without extension (e.g., "image-scene1")
 ```
 
 ## Step 6: Create the Remotion Composition

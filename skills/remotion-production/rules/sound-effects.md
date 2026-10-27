@@ -2,17 +2,17 @@
 
 ## Overview
 
-Generate sound effects using remotion-media's `generate_sfx` tool (ElevenLabs SFX V2). Well-placed SFX elevate video quality — they make transitions feel polished, impacts feel powerful, and scenes feel immersive.
+Generate sound effects using remotion-media's `generate_sound_effect` tool (ElevenLabs SFX V2). Well-placed SFX elevate video quality — they make transitions feel polished, impacts feel powerful, and scenes feel immersive.
 
 ## Generating Sound Effects
 
 ```
-generate_sfx:
+generate_sound_effect:
   prompt: "whoosh transition sound, fast, clean, modern"
-  project_path: "/path/to/remotion/project"
+  output_name: "sfx-whoosh"
 ```
 
-The SFX file is saved to the project's `public/` directory.
+The SFX file is saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 ## Prompt Engineering by Category
 

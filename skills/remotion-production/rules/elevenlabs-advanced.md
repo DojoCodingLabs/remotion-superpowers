@@ -2,13 +2,13 @@
 
 ## Overview
 
-The ElevenLabs MCP server provides advanced voice features beyond basic TTS: voice cloning, custom voice parameters, voice library browsing, and audio isolation. Use this when you need more control than remotion-media's `generate_tts` provides.
+The ElevenLabs MCP server provides advanced voice features beyond basic TTS: voice cloning, custom voice parameters, voice library browsing, and audio isolation. Use this when you need more control than remotion-media's `generate_speech` provides.
 
 ## When to Use ElevenLabs MCP vs remotion-media
 
 | Scenario | Use | Why |
 |---|---|---|
-| Basic narration, any voice | remotion-media `generate_tts` | Simpler, auto-saves to project |
+| Basic narration, any voice | remotion-media `generate_speech` | Simpler, auto-saves to project |
 | Specific ElevenLabs voice ID | ElevenLabs MCP | Direct voice selection |
 | Voice cloning from sample | ElevenLabs MCP | Only way to clone voices |
 | Custom stability/style params | ElevenLabs MCP | Fine-tuned control |

@@ -47,17 +47,18 @@ Caption Style: [TikTok bold / karaoke / minimal]
 #### 2a. Voiceover
 Write a TIGHT script — every word must earn its place in a short:
 ```
-Use remotion-media generate_tts:
+Use remotion-media generate_speech:
 - text: [short, punchy script — no filler words]
+- output_name: voiceover-short
 - voice: [energetic voice like Aria or Charlie for shorts]
-- project_path: [project root]
 ```
+Files land in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 #### 2b. Background Music
 ```
 Use remotion-media generate_music:
 - prompt: "[mood] background music for social media short, energetic, no vocals, [genre]"
-- project_path: [project root]
+- output_name: music-short
 ```
 
 **Good short music prompts:**
@@ -69,7 +70,7 @@ Use remotion-media generate_music:
 
 Search for VERTICAL footage:
 ```
-Use Pexels searchVideos:
+Use Pexels videos_search:
 - query: [keywords]
 - orientation: portrait  ← IMPORTANT: portrait for 9:16
 - size: large
@@ -77,7 +78,7 @@ Use Pexels searchVideos:
 
 Or generate images/clips:
 ```
-Use remotion-media generate_image / generate_video
+Use remotion-media generate_image / generate_video_from_text (or generate_video_from_image to animate an image)
 ```
 
 ### Phase 4: Build the Composition

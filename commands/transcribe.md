@@ -24,11 +24,10 @@ Ask the user which file to transcribe if multiple exist.
 
 ```
 Use remotion-media generate_subtitles:
-- input: [path to audio/video file]
-- project_path: [project root path]
+- input_file: [audio/video filename inside public/, e.g. voiceover.mp3]
 ```
 
-This generates an SRT file with timestamps saved to the project.
+This generates an SRT file with timestamps saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 ### 3. Present the Transcript
 

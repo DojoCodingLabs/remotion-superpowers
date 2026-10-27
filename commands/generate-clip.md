@@ -34,12 +34,20 @@ Good video generation prompts include:
 ### 3. Generate via remotion-media
 
 ```
-Use remotion-media generate_video:
+Use remotion-media generate_video_from_text:
 - prompt: [crafted prompt]
-- project_path: [project root path]
+- output_name: clip-city-aerial
 ```
 
-The clip is saved to the project's `public/` directory.
+To animate a still instead (image-to-video):
+```
+Use remotion-media generate_video_from_image:
+- prompt: [how the image should move]
+- image_urls: [1 image URL to animate, or 2 to transition from first to last frame]
+- output_name: clip-animated-still
+```
+
+The clip is saved to `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
 
 ### 4. Generate via Replicate MCP (if available)
 

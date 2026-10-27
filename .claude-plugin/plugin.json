@@ -1,6 +1,6 @@
 {
   "name": "remotion-superpowers",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Full video production pipeline for Remotion — gives Claude eyes (video analysis), voice (TTS/voiceover), ears (music/SFX), stock footage, AI image/video generation, TikTok captions, 3D content, and more. By Dojo Coding Labs.",
   "author": {
     "name": "Dojo Coding Labs",

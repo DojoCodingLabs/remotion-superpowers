@@ -15,8 +15,7 @@ npx remotion add @remotion/captions
 ### Via remotion-media MCP (Whisper)
 ```
 Use remotion-media generate_subtitles:
-- input: path/to/audio.mp3
-- project_path: /path/to/project
+- input_file: audio.mp3 (filename inside public/)
 ```
 Returns an SRT file. Parse it into Caption objects.
 
