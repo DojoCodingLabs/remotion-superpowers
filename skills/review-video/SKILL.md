@@ -1,30 +1,47 @@
 ---
 name: review-video
-description: Review a rendered video with AI vision. Uses TwelveLabs to watch the output, analyze pacing/composition/audio sync, and provide actionable feedback for improvement. The feedback loop that closes the production circle.
+description: Review a Remotion video with AI vision. Starts with a cheap local check of rendered still frames, then uses TwelveLabs to watch the full render, analyze pacing/composition/audio sync, and provide actionable feedback for improvement. The feedback loop that closes the production circle.
 ---
 
 # Review Video — AI-Powered Video Feedback Loop
 
-You are reviewing a rendered Remotion video using TwelveLabs to "watch" it and provide professional feedback. This closes the production loop — render, review, improve, repeat.
+You are reviewing a Remotion video and providing professional feedback: first from a few rendered frames, then by having TwelveLabs "watch" the full render. This closes the production loop — preview, review, improve, repeat.
 
-**Load the `remotion-production` skill** for the `video-analysis` rule.
+**Load the `remotion-production` skill** for the `video-analysis` rule. Rendering follows the official `remotion-render` skill.
+
+**Rendering is allowed here.** Invoking `/review-video` is an explicit request to render for review, so you don't need to ask again.
 
 ## Workflow
 
-### 1. Find the Rendered Video
+### 1. Quick Frame Check (cheap, local)
 
-Look for the output video:
+Before uploading anything, render a handful of still frames and look at them yourself, as official `remotion-render` shows:
 
 ```bash
-ls out/ 2>/dev/null | grep -E '\.(mp4|webm|mov)$'
+npx remotion render [CompositionId] out/review-frames --frames=0,45,90,150,240 --image-format=png
 ```
 
-If no rendered video exists, tell the user to render first:
+Pick frames that cover the hook, each scene's midpoint, the busiest moments (captions, overlays) and the last frame. Read the PNGs and check:
+- Blank or empty frames, missing assets (a missing `staticFile()` shows as nothing or an error)
+- Text readability, overflow and safe areas (official `remotion-create/video-layout.md`)
+- Caption placement against the platform UI (the `captions-workflow` rule)
+
+If these frames show obvious bugs, fix them first (see step 6) and repeat this step. That's much cheaper than a full render plus a TwelveLabs upload.
+
+### 2. Render the Full Video
+
+Look for an existing render:
+
+```bash
+ls -t out/ 2>/dev/null | grep -E '\.(mp4|webm|mov)$'
+```
+
+If there's none, or the code changed since it was made, render it now:
 ```bash
 npx remotion render [CompositionId] out/video.mp4
 ```
 
-### 2. Index with TwelveLabs
+### 3. Index with TwelveLabs
 
 ```
 Use TwelveLabs MCP to:
@@ -33,7 +50,7 @@ Use TwelveLabs MCP to:
 3. Wait for indexing to complete
 ```
 
-### 3. Analyze — The Director's Review
+### 4. Analyze — The Director's Review
 
 Run a comprehensive review across these dimensions:
 
@@ -70,7 +87,7 @@ Search: "Evaluate the opening hook and call to action"
 - Is there a clear CTA at the end?
 ```
 
-### 4. Present the Review
+### 5. Present the Review
 
 Format the feedback as a professional director's review:
 
@@ -96,22 +113,22 @@ Duration: [X]s | Resolution: [WxH]
   - [ ] [actionable task 1]
   - [ ] [actionable task 2]
   - [ ] [actionable task 3]
-  Then re-render and run /review-video again.
+  Then run /review-video again.
 ```
 
-### 5. Implement Fixes
+### 6. Implement Fixes
 
 Ask the user if they want to apply the suggested fixes. If yes:
-1. Make the code changes
-2. Preview with `npm run dev`
-3. Re-render: `npx remotion render [CompositionId] out/video.mp4`
-4. Offer to run `/review-video` again to verify improvements
+1. **Preserve user changes.** Re-read the files before editing. If the user changed the code or edited things in Studio since the last turn, keep their edits and apply the fixes on top; ask if a fix would undo one of them.
+2. Make the code changes
+3. Check them in Studio (`npx remotion studio`, or `--no-open` with an in-app browser; open the URL it prints). Studio stays open while you iterate.
+4. Offer to run `/review-video` again, which re-renders and verifies the improvements
 
-### 6. Iteration Loop
+### 7. Iteration Loop
 
 Keep iterating until the user is satisfied or the review shows no major issues.
 
-The loop: **Render → Review → Fix → Render → Review** until quality is right.
+The loop: **Frame check → Render → Review → Fix (in Studio) → repeat** until quality is right.
 
 ## Review Checklist
 

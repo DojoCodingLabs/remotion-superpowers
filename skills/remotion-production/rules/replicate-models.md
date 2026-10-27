@@ -92,26 +92,30 @@ replicate_create_prediction:
 Replicate returns URLs to generated files. Download them to the project:
 
 ```bash
-# Download to project public/ directory
-curl -o public/images/generated-hero.png "[replicate_output_url]"
-curl -o public/footage/ai-clip.mp4 "[replicate_output_url]"
+# Download into public/ subfolders (create them first)
+mkdir -p public/images public/footage
+curl -L -o public/images/img-hero.png "[replicate_output_url]"
+curl -L -o public/footage/clip-city.mp4 "[replicate_output_url]"
 ```
 
-Then reference in Remotion with `staticFile()`:
+Then reference them with `staticFile()` and the path relative to `public/`:
 
 ```tsx
-import { Img, OffthreadVideo, staticFile } from "remotion";
+import { Video } from "@remotion/media";
+import { Img, staticFile } from "remotion";
 
-<Img src={staticFile("images/generated-hero.png")} />
-<OffthreadVideo src={staticFile("footage/ai-clip.mp4")} />
+<Img src={staticFile("images/img-hero.png")} />
+<Video src={staticFile("footage/clip-city.mp4")} />
 ```
+
+`<Video>` comes from `@remotion/media` (`npx remotion add @remotion/media`); sizing, trimming and effects follow the official `remotion-markup` skill (embedding-videos.md, images.md).
 
 ## Best Practices
 
 1. **Use MCP tools, not curl** — the Replicate MCP handles auth, polling, and errors
 2. **Start with fast models** for iteration, switch to high-quality for final renders
 3. **Download outputs immediately** — Replicate URLs expire after ~1 hour
-4. **Use descriptive filenames** when saving — `hero-background.png` not `output.png`
+4. **Use descriptive, typed filenames** when saving — `img-hero.png` or `clip-city.mp4`, not `output.png`
 5. **Check model availability** — some models may have cold start times of 30-60s
 6. **Prefer remotion-media for simple tasks** — less setup, auto-saves to project
 7. **Use async predictions for video** — video generation takes minutes, not seconds

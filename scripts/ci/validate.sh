@@ -215,6 +215,20 @@ else
   fail "$err"
 fi
 
+# --- 8. Remotion API drift guard ---------------------------------------------
+# Remotion's official skills are the source of truth for markup. Fail on APIs
+# they've replaced, so our docs can't drift back.
+section "No outdated Remotion APIs in ${DOC_DIRS[*]:-(no doc dirs)}"
+DRIFT_RE='OffthreadVideo|startFrom=|endAt=|@remotion/light-leaks|npm run dev|localhost:3000|Math\.random|getAudioDurationInSeconds|import \{[^}]*\b(Audio|Video)\b[^}]*\} from "remotion"'
+if [ "${#DOC_DIRS[@]}" -gt 0 ]; then
+  if hits=$(grep -rnE --include='*.md' "$DRIFT_RE" "${DOC_DIRS[@]}"); then
+    printf '%s\n' "$hits"
+    fail "outdated Remotion APIs found (see the official remotion-markup skill for the current ones)"
+  else
+    pass "no outdated Remotion APIs"
+  fi
+fi
+
 # --- Summary ---------------------------------------------------------------
 echo ""
 if [ "$FAILURES" -eq 0 ]; then

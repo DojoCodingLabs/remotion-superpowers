@@ -1,135 +1,73 @@
 # Audio Integration in Remotion
 
-## The `<Audio>` Component
+## Placing Audio
 
-Always use Remotion's `<Audio>` component. Never use HTML `<audio>` tags.
+Place every file with `<Audio>` from `@remotion/media` (install with `npx remotion add @remotion/media`), following the official `remotion-markup` skill (audio.md). It covers trimming (`trimBefore` / `durationInFrames`), delaying (`from`), `volume`, `loop`, `playbackRate` and muting. Never use HTML `<audio>` tags.
 
-```tsx
-import { Audio, staticFile } from "remotion";
+Put `from`, `loop` and `volume` directly on `<Audio>` rather than wrapping it in a `<Sequence>`, so each layer stays editable in Studio.
 
-// Basic usage
-<Audio src={staticFile("audio/voiceover.mp3")} />
+## Layer Conventions
 
-// With volume control (0 to 1)
-<Audio src={staticFile("audio/music.mp3")} volume={0.3} />
+| Layer | File (from the MCP tools) | Volume | Placement |
+|---|---|---|---|
+| Voiceover | `vo-scene1.mp3`, `vo-scene2.mp3`, … | 1.0 | One `<Audio>` per scene, inside that scene |
+| Background music | `music-bg.mp3` | 0.1–0.2 under voiceover, 0.25–0.4 without | Composition level, with fade in/out and ducking |
+| SFX (transition, impact) | `sfx-whoosh.mp3` or a hosted `https://remotion.media/*.wav` | 0.5–0.8 | `from` on the visual event's frame |
+| SFX (UI pops, ticks) | `sfx-pop.mp3` | 0.3–0.5 | `from` on the element's entrance frame |
+| Ambient SFX | `sfx-city-ambiance.mp3` | 0.1–0.2 | Scene level, `loop`, faded in/out |
 
-// Starting at a specific frame
-<Audio src={staticFile("audio/sfx-whoosh.mp3")} startFrom={0} />
-```
-
-## Layering Multiple Audio Tracks
-
-Use `<Sequence>` to layer and time audio tracks:
-
-```tsx
-import { Audio, Sequence, staticFile, useVideoConfig } from "remotion";
-
-export const AudioLayer: React.FC = () => {
-  const { fps } = useVideoConfig();
-  
-  return (
-    <>
-      {/* Background music — plays from the start, lower volume */}
-      <Audio src={staticFile("audio/music.mp3")} volume={0.2} />
-      
-      {/* Voiceover — plays from the start, full volume */}
-      <Audio src={staticFile("audio/voiceover.mp3")} volume={1} />
-      
-      {/* Sound effect at 3 seconds */}
-      <Sequence from={3 * fps}>
-        <Audio src={staticFile("audio/sfx-whoosh.mp3")} volume={0.8} />
-      </Sequence>
-      
-      {/* Sound effect at 10 seconds */}
-      <Sequence from={10 * fps}>
-        <Audio src={staticFile("audio/sfx-chime.mp3")} volume={0.6} />
-      </Sequence>
-    </>
-  );
-};
-```
+**Rule:** the voiceover is always the loudest layer. If you notice the music or SFX more than the narration, lower them.
 
 ## Dynamic Volume (Ducking)
 
-Lower music volume when voiceover is playing:
+Lower the music while narration plays. With per-scene voiceover, the narration frames come from the scene durations computed in `calculateMetadata` (see `voiceover-sync.md`):
 
 ```tsx
-import { Audio, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { Audio } from "@remotion/media";
+import { interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 export const MusicWithDucking: React.FC<{
   voiceoverStartFrame: number;
   voiceoverEndFrame: number;
 }> = ({ voiceoverStartFrame, voiceoverEndFrame }) => {
   const frame = useCurrentFrame();
-  
-  // Duck music to 10% during voiceover, 40% otherwise
-  const musicVolume = interpolate(
-    frame,
-    [
-      voiceoverStartFrame - 15, // Fade down over 0.5s
-      voiceoverStartFrame,
-      voiceoverEndFrame,
-      voiceoverEndFrame + 15, // Fade up over 0.5s
-    ],
-    [0.4, 0.1, 0.1, 0.4],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  const { fps } = useVideoConfig();
+  const fade = Math.round(0.5 * fps);
+
+  return (
+    <Audio
+      src={staticFile("music-bg.mp3")}
+      loop
+      // Duck music to 10% during voiceover, 40% otherwise
+      volume={interpolate(
+        frame,
+        [
+          voiceoverStartFrame - fade, // Fade down over 0.5s
+          voiceoverStartFrame,
+          voiceoverEndFrame,
+          voiceoverEndFrame + fade, // Fade up over 0.5s
+        ],
+        [0.4, 0.1, 0.1, 0.4],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+      )}
+    />
   );
-  
-  return <Audio src={staticFile("audio/music.mp3")} volume={musicVolume} />;
 };
 ```
 
-## Getting Audio Duration
-
-After generating audio with remotion-media, you get the duration in seconds. Use it to set composition length:
-
-```tsx
-// If voiceover is 25.3 seconds and fps is 30:
-const durationInFrames = Math.ceil(25.3 * 30); // = 759 frames
-```
-
-Use Remotion's `getAudioDurationInSeconds` for existing files:
-
-```tsx
-import { getAudioDurationInSeconds } from "@remotion/media-utils";
-
-// In calculateMetadata or a data-fetching context:
-const duration = await getAudioDurationInSeconds(staticFile("audio/voiceover.mp3"));
-const durationInFrames = Math.ceil(duration * fps);
-```
-
-## File Naming Conventions
-
-Save generated audio to `public/audio/` with descriptive names:
-- `public/audio/voiceover.mp3` — Main narration
-- `public/audio/music.mp3` — Background music
-- `public/audio/sfx-whoosh.mp3` — Transition sound
-- `public/audio/sfx-chime.mp3` — Notification sound
+For several narration blocks with gaps between them, extend the input and output ranges with one fade-down / fade-up pair per block. Pass a constant `0.1` instead if the narration runs nearly end to end.
 
 ## Common Patterns
 
-### Fade-in/Fade-out Music
-```tsx
-const frame = useCurrentFrame();
-const { durationInFrames, fps } = useVideoConfig();
+- **Fade music in and out:** an `interpolate()` on `volume` over `[0, fps, durationInFrames - 2 * fps, durationInFrames]` → `[0, 0.3, 0.3, 0]` (official audio.md, "Volume").
+- **SFX on a frame:** `<Audio src={staticFile("sfx-whoosh.mp3")} from={3 * fps} volume={0.6} />`.
+- **Play only part of a file:** `trimBefore` and `durationInFrames` on `<Audio>` (official audio.md, "Trimming").
+- **Music shorter than the video:** `loop` on `<Audio>` (official audio.md, "Looping").
 
-const musicVolume = interpolate(
-  frame,
-  [0, 1 * fps, durationInFrames - 2 * fps, durationInFrames],
-  [0, 0.3, 0.3, 0],
-  { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-);
+## Measuring Audio Duration
 
-<Audio src={staticFile("audio/music.mp3")} volume={musicVolume} />
-```
+The MCP tools return a path, not a duration. Measure files in `calculateMetadata` with Mediabunny, as the official `remotion-multimedia` skill shows (get-audio-duration.md), and convert with `Math.ceil(seconds * fps)`. The per-scene pattern is in `voiceover-sync.md`.
 
-### Trim Audio (play only a portion)
-```tsx
-// Play from second 5 to second 15 of the audio file
-<Sequence from={0} durationInFrames={10 * fps}>
-  <Audio
-    src={staticFile("audio/long-track.mp3")}
-    startFrom={5 * fps}
-  />
-</Sequence>
-```
+## File Naming
+
+remotion-media tools write to the `public/` root, so the type goes in `output_name`: `vo-scene1`, `music-bg`, `sfx-whoosh`. Reference them as `staticFile("vo-scene1.mp3")`. See `asset-management.md`.

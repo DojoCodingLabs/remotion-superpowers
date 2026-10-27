@@ -1,140 +1,83 @@
 ---
 name: add-captions
-description: Generate TikTok-style animated captions for your Remotion video. Transcribes audio with Whisper, then creates word-by-word animated subtitles with customizable position, colors, and style.
+description: Add TikTok-style, karaoke, YouTube or minimal captions to your Remotion video. Gets word-level captions through the official remotion-captions flow (or line-level SRT via generate_subtitles), places one official caption element per clip, and applies a style preset with platform-safe placement.
 ---
 
-# Add Captions — TikTok-Style Animated Subtitles
+# Add Captions: Animated Subtitles
 
-You are helping the user add animated word-by-word captions to their Remotion video.
+You are helping the user add captions to their Remotion video.
 
-**Load the `remotion-production` skill** for the `captions-workflow` rule.
+**Load the `remotion-production` skill** for the `captions-workflow` rule (presets and safe zones), and the official **`remotion-captions`** skill for transcription and display. The official skill wins on any API detail.
 
 ## Workflow
 
 ### 1. Identify the Audio Source
 
-Find the voiceover or primary audio file:
+Find the voiceover or primary audio file(s):
 
 ```bash
-# Check for existing audio files
-ls public/audio/ public/ 2>/dev/null | grep -E '\.(mp3|wav|m4a|ogg)$'
+ls public/ public/footage/ 2>/dev/null | grep -E '\.(mp3|wav|m4a|ogg|mp4|mov|webm)$'
 ```
 
-If no audio exists, suggest running `/add-voiceover` first.
+If no audio exists, suggest running `/add-voiceover` first. If the video has one voiceover per scene (`vo-scene1.mp3`, `vo-scene2.mp3`, …), caption **each file separately**.
 
-### 2. Transcribe with Whisper
+Make sure Studio is already running (`npx remotion studio`, or `--no-open` with an in-app browser; open the URL it prints), so the user sees captions appear.
 
-Generate word-level timestamps:
+### 2. Choose Caption Style
+
+Ask the user what style they want. The style decides which transcription route you need:
+
+- **TikTok style** (default): bold, a few words at a time, the active word pops in a highlight color. *Needs word-level.*
+- **Karaoke style**: full phrase on screen, words highlight as they're spoken. *Needs word-level.*
+- **YouTube style**: bottom of screen, a sentence at a time. *Works with SRT.*
+- **Minimal**: small, subtle, bottom-left. *Works with SRT.*
+
+### 3. Transcribe
+
+**Word-level (TikTok, karaoke):** follow official `remotion-captions/transcribe-captions.md`. It writes a Node script with `@remotion/whisper-webgpu` that outputs `Caption` JSON with one entry per word. It needs a compatible GPU and doesn't run on Linux arm64.
+
+**Line-level (YouTube, minimal, or when whisper-webgpu can't run):**
 
 ```
 Use remotion-media generate_subtitles:
-- input_file: [audio filename inside public/, e.g. narration-intro.mp3]
+- input_file: [filename inside public/, e.g. vo-scene1.mp3]
+- output_name: [optional, e.g. subs-scene1]
 ```
 Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
-This returns an SRT file with timestamps. Save to `public/captions/`.
+This returns an **SRT** file, and SRT is line-level. Convert it with `parseSrt()` from `@remotion/captions`, as official `import-srt-captions.md` shows. Each caption is then a whole subtitle line, so a word highlight can't work from it. If the user picked TikTok or karaoke and only SRT is possible, tell them and offer the YouTube style instead.
 
-### 3. Install Captions Package
+Keep each transcript's timestamps relative to its own source file.
 
-Ensure `@remotion/captions` is installed:
+### 4. Place the Official Caption Element
 
-```bash
-npx remotion add @remotion/captions
-```
+Follow official `remotion-captions/display-captions.md`:
 
-### 4. Choose Caption Style
+- Install `@remotion/captions` with `npx remotion add @remotion/captions` if needed.
+- Copy the element for the chosen style into the project from `https://www.remotion.dev/elements/captions/<element>.md`: Popping Word Captions for TikTok, Word Highlight Captions for karaoke, Basic Captions for YouTube and minimal.
+- Put **one element per captioned clip, inside that clip's own `<Sequence>`** next to its `<Audio>`/`<Video>`. Don't add one global caption layer over the whole composition.
+- **Inline the caption array** in the `captions` prop so the Studio Caption editor can write back.
 
-Ask the user what style they want:
+### 5. Customize Appearance
 
-- **TikTok style** (default) — Bold, centered, one word at a time, colored highlight
-- **YouTube style** — Bottom of screen, sentence at a time
-- **Karaoke style** — Words highlight as they're spoken
-- **Minimal** — Small, subtle, bottom-left
+Apply the preset from the `captions-workflow` rule, then offer these options. Change them through the element's `width`, `style` and `combineTokensWithinMilliseconds` props, or the style constants at the top of the copied file:
 
-### 5. Create the Captions Component
-
-```tsx
-import { useCurrentFrame, useVideoConfig } from "remotion";
-import { createTikTokStyleCaptions } from "@remotion/captions";
-
-// Parse the transcription into Remotion Caption objects
-// Apply createTikTokStyleCaptions() for word-by-word timing
-
-export const Captions: React.FC<{ captions: Caption[] }> = ({ captions }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const currentTimeMs = (frame / fps) * 1000;
-
-  const { pages } = createTikTokStyleCaptions({
-    captions,
-    combineTokensWithinMilliseconds: 800,
-  });
-
-  // Find current page based on time
-  const currentPage = pages.find(
-    (p) => currentTimeMs >= p.startMs && currentTimeMs < p.startMs + p.durationMs
-  );
-
-  if (!currentPage) return null;
-
-  return (
-    <div style={{
-      position: "absolute",
-      bottom: "15%",
-      left: 0,
-      right: 0,
-      display: "flex",
-      justifyContent: "center",
-      padding: "0 40px",
-    }}>
-      <div style={{
-        fontSize: 64,
-        fontWeight: 800,
-        textAlign: "center",
-        textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
-        color: "white",
-      }}>
-        {currentPage.tokens.map((token, i) => {
-          const isActive = currentTimeMs >= token.fromMs && currentTimeMs < token.toMs;
-          return (
-            <span key={i} style={{
-              color: isActive ? "#FFD700" : "white",
-              transition: "color 0.1s",
-            }}>
-              {token.text}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-```
-
-### 6. Customize Appearance
-
-Offer the user these customization options:
-
-- **Position**: top (10%), center (50%), bottom (15%)
-- **Font size**: Small (40px), Medium (56px), Large (72px)
+- **Position**: top (10%), center (50%), bottom (15-25% on vertical, to stay clear of platform UI). See the safe-zone table in the rule.
+- **Font size**: Small (40px), Medium (56px), Large (72px) at 1080 wide
 - **Highlight color**: Yellow (#FFD700), Cyan (#00FFFF), Green (#00FF88), custom
-- **Background**: None, semi-transparent box, blur
-- **Font**: Inter, Poppins, or whatever the project uses
-- **Animation**: Pop-in, fade-in, slide-up for each word group
+- **Background**: None, semi-transparent box
+- **Font**: Inter, Poppins, or whatever the project uses (load it as official `remotion-markup` google-fonts.md shows)
+- **Words per page**: `combineTokensWithinMilliseconds` (lower = fewer words per page)
 
-### 7. Wire into Composition
+Any extra animation uses inline `interpolate()` in `style` with the `scale`/`translate` properties. Never use CSS `transition` or `animation`; they don't render.
 
-Add the Captions component as an overlay layer on top of everything:
+### 6. Check in the Preview
 
-```tsx
-// In the main composition, as the LAST visual layer (on top):
-<Captions captions={parsedCaptions} />
-```
-
-### 8. Preview & Adjust
-
-Tell the user to check captions in the Remotion preview. Common adjustments:
+Tell the user to scrub the captions in the open Studio. Common adjustments:
 - Text too small/large on mobile? → Adjust font size
-- Words moving too fast? → Increase `combineTokensWithinMilliseconds`
-- Wrong timing? → Check audio/caption sync
-- Overlapping with visuals? → Change position (top vs bottom)
+- Words changing too fast? → Increase `combineTokensWithinMilliseconds`
+- Wrong timing? → Check that the captions sit in the same sequence as their audio, and that timestamps weren't offset
+- Overlapping with visuals or platform UI? → Change position (top vs bottom)
+- Wording mistakes? → Fix them in the Studio Caption editor, or edit the inlined array
+
+Don't render unless the user asks for an MP4.

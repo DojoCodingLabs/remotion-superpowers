@@ -1,13 +1,13 @@
 ---
 name: create-short
-description: Create a short-form vertical video (TikTok, Instagram Reels, YouTube Shorts). Optimized 9:16 pipeline with auto-captions, hook-first structure, and background music mood selection.
+description: Create a short-form vertical video (TikTok, Instagram Reels, YouTube Shorts). Optimized 9:16 pipeline with a live Studio preview, auto-captions, hook-first structure, and background music mood selection; renders to MP4 only when you ask.
 ---
 
 # Create Short — Vertical Short-Form Video Pipeline
 
 You are creating a short-form vertical video optimized for TikTok, Instagram Reels, or YouTube Shorts.
 
-**Load the `remotion-production` skill** for production patterns, plus `remotion-best-practices` for Remotion-specific code.
+**Load the `remotion-production` skill** for the MCP steps and the `captions-workflow` rule, plus the official `remotion-best-practices` skill for all Remotion markup, preview and render (it routes to `remotion-create`, `remotion-markup`, `remotion-captions`, `remotion-render`). The official skills win on Remotion APIs.
 
 ## Key Differences from `/create-video`
 
@@ -19,6 +19,11 @@ You are creating a short-form vertical video optimized for TikTok, Instagram Ree
 - **Pacing**: Fast cuts, 2-5 seconds per scene, no slow moments
 
 ## Pipeline
+
+### Phase 0: Project and Preview
+
+1. Use the existing Remotion project, or scaffold one exactly as official `remotion-create` says (`npx create-video@latest --yes --blank --no-tailwind`, after inspecting the folder).
+2. As soon as it runs, start Studio and keep it open: `npx remotion studio` (or `npx remotion studio --no-open` with an in-app browser). Open the exact URL it prints, then `/<composition-id>` once the composition exists.
 
 ### Phase 1: Concept (Keep It Simple)
 
@@ -42,23 +47,28 @@ Music Mood: [upbeat, chill, dramatic, inspiring, dark, funny]
 Caption Style: [TikTok bold / karaoke / minimal]
 ```
 
+**Get the user's approval on this plan before generating assets.**
+
 ### Phase 2: Generate Audio (voiceover drives everything)
 
 #### 2a. Voiceover
-Write a TIGHT script — every word must earn its place in a short:
+Write a TIGHT script — every word must earn its place in a short. Generate one file per part:
 ```
 Use remotion-media generate_speech:
-- text: [short, punchy script — no filler words]
-- output_name: voiceover-short
+- text: [short, punchy hook line — no filler words]
+- output_name: vo-hook
 - voice: [energetic voice like Aria or Charlie for shorts]
 ```
-Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+Repeat for `vo-body`, `vo-cta` (or `vo-body1`, `vo-body2` for several body scenes). Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+
+The tool returns the path, not the duration: measure each file in `calculateMetadata` (see the `voiceover-sync` rule and official `remotion-multimedia`).
 
 #### 2b. Background Music
 ```
 Use remotion-media generate_music:
-- prompt: "[mood] background music for social media short, energetic, no vocals, [genre]"
-- output_name: music-short
+- prompt: "[mood] background music for social media short, energetic, [genre]"
+- output_name: music-bg
+- instrumental: true
 ```
 
 **Good short music prompts:**
@@ -75,74 +85,45 @@ Use Pexels videos_search:
 - orientation: portrait  ← IMPORTANT: portrait for 9:16
 - size: large
 ```
+Download into `public/footage/` (`mkdir -p public/footage`, then `curl -L -o`). Pexels doesn't require attribution, but it's appreciated.
 
-Or generate images/clips:
+Or generate images/clips with `aspect_ratio: "9:16"`:
 ```
 Use remotion-media generate_image / generate_video_from_text (or generate_video_from_image to animate an image)
+- output_name: img-hook / clip-body1 / ...
+- aspect_ratio: 9:16
 ```
 
-### Phase 4: Build the Composition
+### Phase 4: Build the Composition Live
 
-Create the composition with vertical dimensions:
+Build each part while Studio is open, so the user sees the hook as soon as it exists. Follow official `remotion-markup` for all markup (`multi-scene-video.md`, `audio.md`, `embedding-videos.md`) and `remotion-create/video-layout.md` for layout:
 
-```tsx
-<Composition
-  id="MyShort"
-  component={MyShort}
-  durationInFrames={Math.ceil(voiceoverDuration * 30) + 60}
-  fps={30}
-  width={1080}
-  height={1920}
-/>
-```
+- Register the composition at **1080x1920, 30 fps**, with `calculateMetadata` summing the measured voiceover durations (`Math.ceil`)
+- **Hook → Body → CTA** as three adjacent scenes (`<TransitionSeries.Sequence>` items), each holding its own `vo-*` audio
+- Music (`music-bg.mp3`) runs under everything with `loop`, ducked under the voice (see the `audio-integration` rule)
+- `<Audio>`/`<Video>` from `@remotion/media`
 
-**Short-form composition structure:**
-
-```tsx
-// Hook — first 3 seconds, grab attention
-<Sequence from={0} durationInFrames={3 * fps}>
-  <HookScene />
-</Sequence>
-
-// Body — main content, fast-paced scenes
-<Sequence from={3 * fps} durationInFrames={bodyDuration}>
-  <BodyScenes />
-</Sequence>
-
-// CTA — last 3-5 seconds
-<Sequence from={totalFrames - 4 * fps} durationInFrames={4 * fps}>
-  <CTAScene />
-</Sequence>
-
-// Audio layers
-<Audio src={staticFile("audio/voiceover.mp3")} volume={1} />
-<Audio src={staticFile("audio/music.mp3")} volume={musicVolume} />
-
-// Captions — ALWAYS on top
-<Captions captions={parsedCaptions} />
-```
-
-**Typography for vertical:**
-- Title text: 72-96px bold (fills width)
+**Typography for vertical** (above official video-layout.md minimums):
+- Title text: 84-96px bold (fills width)
 - Body text: 48-64px
-- Captions: 56-72px bold with shadow
-- Keep text in the center 60% of screen (safe zone for platform UI)
+- Captions: 64-80px bold with outline
+- Keep key text in the center ~60% of the screen; platform UI covers the bottom ~15% and the right ~15%
 
 ### Phase 5: Add Captions
 
 Captions are MANDATORY for shorts. Use the same workflow as `/add-captions`:
 
-1. Transcribe the voiceover with Whisper
-2. Use `createTikTokStyleCaptions()` from `@remotion/captions`
-3. Style with bold font, high contrast, animated highlight
-4. Position in lower-center (above platform UI controls)
+1. Transcribe each voiceover file with the official word-level flow (`remotion-captions/transcribe-captions.md`). Use `generate_subtitles` (line-level SRT) only if that can't run, and then switch to a line-at-a-time style.
+2. Copy the official caption element for the chosen style (Popping Word Captions for TikTok bold) and put one inside each scene, next to that scene's voiceover, with the captions inlined (official `display-captions.md`)
+3. Apply the TikTok preset from the `captions-workflow` rule: bold, high contrast, highlight color
+4. Place it 15-25% up from the bottom, clear of the platform UI
 
-### Phase 6: Preview & Render
+### Phase 6: Review in Studio, Render on Request
 
+Ask the user to check the short in Studio at 1080x1920 (and on a phone-sized window). Iterate on their feedback, and **preserve any edits they made in the code or in Studio**.
+
+Render only when the user asks for the MP4, following official `remotion-render` (or use Studio's render button):
 ```bash
-npm run dev
-# Preview at 1080x1920 — check on mobile dimensions
-
 npx remotion render MyShort out/short.mp4 --codec h264 --crf 18
 ```
 

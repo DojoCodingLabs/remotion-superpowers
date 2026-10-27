@@ -26,7 +26,8 @@ Craft a descriptive prompt and generate:
 ```
 Use remotion-media generate_music:
 - prompt: "[genre] background music, [mood], [tempo], no vocals, [additional descriptors]"
-- output_name: music-background
+- output_name: music-bg
+- instrumental: true
 ```
 Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
@@ -38,34 +39,36 @@ Files land in `public/` of the directory your agent was launched from, so start 
 
 ### 3. Wire into Composition
 
-Add with fade in/out:
+Place it with `<Audio>` from `@remotion/media` (install with `npx remotion add @remotion/media`), following the official `remotion-markup` skill (audio.md), with fade in/out:
 
 ```tsx
-import { Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { Audio } from "@remotion/media";
+import { interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const frame = useCurrentFrame();
 const { durationInFrames, fps } = useVideoConfig();
 
-const musicVolume = interpolate(
-  frame,
-  [0, fps, durationInFrames - 2 * fps, durationInFrames],
-  [0, 0.25, 0.25, 0],
-  { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-);
-
-<Audio src={staticFile("[returned-file-path]")} volume={musicVolume} />
+<Audio
+  src={staticFile("music-bg.mp3")}
+  volume={interpolate(
+    frame,
+    [0, fps, durationInFrames - 2 * fps, durationInFrames],
+    [0, 0.25, 0.25, 0],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  )}
+/>
 ```
 
 ### 4. Adjust for Voiceover (if present)
 
 If the project has a voiceover, implement volume ducking — lower music to 0.1 during narration, 0.3 during silent parts. See `audio-integration` rule for the pattern.
 
-### 5. Preview
+### 5. Preview in Studio
 
-Tell the user to check the audio in the Remotion preview (`npm run dev`).
+If Studio isn't running, start it with `npx remotion studio` (or `--no-open` with an in-app browser, then open the URL it prints). Ask the user to listen there. Don't render unless they ask for an MP4.
 
 Offer adjustments:
 - Volume too loud/quiet?
 - Wrong mood? Regenerate with a different prompt.
-- Music too short? Use `<Loop>` to repeat it.
-- Need different music for different sections? Generate multiple tracks.
+- Music too short? Add `loop` to the `<Audio>`, or generate a longer track.
+- Need different music for different sections? Generate multiple tracks (`music-intro`, `music-main`, …) and give each its own `from` and `durationInFrames`.

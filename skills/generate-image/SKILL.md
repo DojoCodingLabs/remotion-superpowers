@@ -38,7 +38,8 @@ Write a detailed image generation prompt. Good prompts include:
 ```
 Use remotion-media generate_image:
 - prompt: [crafted prompt]
-- output_name: image-hero
+- output_name: img-hero
+- aspect_ratio: 16:9  # match the composition (9:16 for shorts)
 ```
 
 The image is saved to `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
@@ -59,7 +60,8 @@ replicate_run:
 
 Download the output to the project:
 ```bash
-curl -o public/images/[descriptive-name].png "[replicate_output_url]"
+mkdir -p public/images
+curl -L -o public/images/img-[descriptive-name].png "[replicate_output_url]"
 ```
 
 Available Replicate models:
@@ -72,23 +74,34 @@ See `skills/remotion-production/rules/replicate-models.md` and `rules/image-gene
 
 ### 5. Show Usage in Remotion
 
-```tsx
-import { Img, staticFile } from "remotion";
+Add the image with `<CanvasImage>` from `remotion`, as the official `remotion-markup` skill does (`<Img>` still works; both accept `effects`). Sizing and animation follow its images.md and timing.md. The path depends on the provider: `generate_image` saves to `public/<output_name>.png`, Replicate downloads to `public/images/`.
 
-// As a background
-<Img
-  src={staticFile("images/generated-background.png")}
+```tsx
+import { CanvasImage, Easing, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+
+const frame = useCurrentFrame();
+const { fps } = useVideoConfig();
+
+// As a background (remotion-media output)
+<CanvasImage
+  src={staticFile("img-hero.png")}
   style={{ width: "100%", height: "100%", objectFit: "cover" }}
 />
 
-// As an element with animation
-const frame = useCurrentFrame();
-const scale = spring({ frame, fps, config: { damping: 200 } });
-<Img
-  src={staticFile("images/product.png")}
-  style={{ transform: `scale(${scale})` }}
+// As an element that pops in (Replicate download)
+<CanvasImage
+  src={staticFile("images/img-product.png")}
+  style={{
+    scale: interpolate(frame, [0, 0.6 * fps], [0, 1], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp",
+      easing: Easing.spring({ damping: 200 }),
+      output: "perceptual-scale",
+    }),
+  }}
 />
 ```
+
+For a slow Ken Burns move on a still, see `skills/remotion-production/rules/image-generation.md`.
 
 ### 6. Iterate
 

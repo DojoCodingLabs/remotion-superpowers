@@ -31,7 +31,7 @@ videos_search:
 
 ## Downloading Footage
 
-After finding suitable clips, download them to the project:
+The Pexels MCP has no download tool. Take the file URL from `video_get` (or the search result's `video_files`; pick the `hd` entry closest to your composition size) and download it into the project:
 
 ```bash
 # Create footage directory
@@ -49,90 +49,52 @@ curl -L -o public/images/hero-bg.jpg "https://images.pexels.com/..."
 
 ## Using Stock Footage in Remotion
 
-### Video Clips
+Place clips with `<Video>` from `@remotion/media` (install with `npx remotion add @remotion/media`) and photos with `<Img>` or `<CanvasImage>`, following the official `remotion-markup` skill (embedding-videos.md, images.md). Trim with `trimBefore` plus `durationInFrames` (timing-props.md). The one thing to get right on our side is the path: `staticFile()` takes the path relative to `public/`, exactly where `curl` saved it.
 
 ```tsx
-import { OffthreadVideo, Sequence, staticFile, useVideoConfig } from "remotion";
+import { Video } from "@remotion/media";
+import { AbsoluteFill, staticFile, useVideoConfig } from "remotion";
 
-export const StockFootageScene: React.FC = () => {
+export const FootageWithText: React.FC = () => {
   const { fps } = useVideoConfig();
 
   return (
-    <Sequence from={0} durationInFrames={5 * fps}>
-      <OffthreadVideo
-        src={staticFile("footage/scene-city.mp4")}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
-    </Sequence>
-  );
-};
-```
-
-### Trimming Video Clips
-
-Play only a specific portion of a stock clip:
-
-```tsx
-<OffthreadVideo
-  src={staticFile("footage/long-clip.mp4")}
-  startFrom={3 * fps}  // Start from 3 seconds into the clip
-  endAt={8 * fps}       // End at 8 seconds
-  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-/>
-```
-
-### Overlay Text on Stock Footage
-
-```tsx
-import { AbsoluteFill, OffthreadVideo, staticFile } from "remotion";
-
-export const FootageWithText: React.FC = () => {
-  return (
     <AbsoluteFill>
-      {/* Background footage */}
-      <OffthreadVideo
-        src={staticFile("footage/city-aerial.mp4")}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      {/* Stock clips are long: play seconds 3-8, muted under the voiceover */}
+      <Video
+        src={staticFile("footage/scene-city.mp4")}
+        trimBefore={3 * fps}
+        durationInFrames={5 * fps}
+        muted
+        objectFit="cover"
+        style={{ width: "100%", height: "100%" }}
       />
-      
+
       {/* Dark overlay for text readability */}
       <AbsoluteFill style={{ backgroundColor: "rgba(0,0,0,0.4)" }} />
-      
-      {/* Text overlay */}
+
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-        <h1 style={{ color: "white", fontSize: 72, fontWeight: "bold" }}>
-          Your Text Here
-        </h1>
+        <h1 style={{ color: "white", fontSize: 72, fontWeight: "bold" }}>Your Text Here</h1>
       </AbsoluteFill>
     </AbsoluteFill>
   );
 };
 ```
 
-### Stock Photos as Backgrounds
-
-```tsx
-import { AbsoluteFill, Img, staticFile } from "remotion";
-
-<AbsoluteFill>
-  <Img
-    src={staticFile("images/hero-bg.jpg")}
-    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-  />
-</AbsoluteFill>
-```
+For a cinematic grade or vignette on the footage, use the official effects on the `<Video>` (see `visual-effects.md`).
 
 ## Pexels Attribution
 
-When using Pexels content, include attribution:
-- Show "Photos/Videos provided by Pexels" in the video credits
-- Credit individual photographers when possible
+Pexels doesn't require attribution, but it's appreciated:
+- Add "Photos/Videos provided by Pexels" to the video credits or description
+- Credit individual photographers by name when possible (`user.name` on a video result, `photographer` on a photo result)
 
 ## Best Practices
 
-1. **Download to `public/footage/`** — consistent path for all stock clips
-2. **Use `OffthreadVideo`** — not `<Video>`, for better rendering performance
-3. **Always use `objectFit: "cover"`** — prevents letterboxing/pillarboxing
+1. **Download to `public/footage/`** (videos) and `public/images/` (photos), after `mkdir -p`
+2. **Use `<Video>` from `@remotion/media`** — not the older video components from `remotion`
+3. **Cover the frame** — `objectFit="cover"` prevents letterboxing/pillarboxing
 4. **Add overlays** — dark/gradient overlays make text readable over footage
-5. **Trim clips** — stock clips are often longer than needed, use `startFrom`/`endAt`
-6. **Match aspect ratios** — search with `orientation: "landscape"` for 16:9 output
+5. **Trim clips** — stock clips are often longer than needed; use `trimBefore` plus `durationInFrames`
+6. **Mute stock audio** — `muted` unless the clip's own sound is wanted
+7. **Match aspect ratios** — search with `orientation: "landscape"` for 16:9 output, `"portrait"` for 9:16
