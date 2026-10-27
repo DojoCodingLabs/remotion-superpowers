@@ -14,7 +14,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "^mcp__(plugin_remotion-superpowers_)?Pexels__(photos_search|videos_search|photo_get|video_get)$",
+        "matcher": "^mcp__(plugin_remotion-superpowers_)?Pexels__pexels_(search_photos|search_videos|get_photo|get_video)$",
         "hooks": [
           {
             "type": "command",

@@ -1,13 +1,13 @@
 ---
 name: add-voiceover
-description: Generate a voiceover narration and add it to your Remotion project. Provide a script or describe what the narration should say, and this will generate TTS audio and wire it into your composition.
+description: Generate a voiceover narration and add it to your Remotion project. Provide a script or describe what the narration should say, and this will generate per-scene ElevenLabs TTS audio (official ElevenLabs text-to-speech skill) and wire it into your composition.
 ---
 
 # Add Voiceover — Generate & Integrate Narration
 
 You are helping the user add a voiceover narration to their Remotion project.
 
-**Load the `remotion-production` skill** for the `voiceover-sync` and `audio-integration` rules.
+**Load the `remotion-production` skill** for the `voiceover-sync` and `audio-integration` rules, and the official ElevenLabs **`text-to-speech`** skill (`npx skills add elevenlabs/skills`) for the API details.
 
 ## Workflow
 
@@ -25,30 +25,27 @@ If the user hasn't provided a script:
 
 ### 2. Choose Voice
 
-Available voices (via remotion-media generate_speech):
-- **Eric** — Warm, professional male (default)
-- **Rachel** — Clear, engaging female
-- **Aria** — Energetic female
-- **Roger** — Deep, authoritative male
-- **Sarah** — Friendly, conversational female
-- **Laura** — Calm, soothing female
-- **Charlie** — Casual, youthful male
+Pre-made voices (from the official `text-to-speech` skill):
+- **George** (`JBFqnCBsd6RMkjVDRZzb`) — Male, narrative (default)
+- **Sarah** (`EXAVITQu4vr4xnSDxMaL`) — Female, soft
+- **Daniel** (`onwK4e9ZLuTAKqWW03F9`) — Male, authoritative
+- **Charlotte** (`XB0fDUnXU5powFXDhCwa`) — Female, conversational
 
-14 more are listed in the `voiceover-sync` rule. For voice cloning or custom voices, use the dedicated ElevenLabs MCP (requires `ELEVENLABS_API_KEY`; see the `elevenlabs-advanced` rule).
-
-Use `generate_speech`, not a script calling the ElevenLabs API, and don't ask for an ElevenLabs key for the built-in voices.
+For a specific mood, accent or language, search the voice library; for a cloned voice or several speakers, see the `elevenlabs-advanced` rule. Use the same voice for every scene.
 
 ### 3. Generate TTS, One File per Scene
 
-```
-Use remotion-media generate_speech, once per scene:
-- text: [that scene's approved line]
-- output_name: vo-scene1, vo-scene2, ...
-- voice: [chosen voice, the same for every scene]
-```
-Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+Generate through ElevenLabs, as the official Remotion voiceover guide also recommends:
 
-The tool returns the **file path only**, not a duration.
+1. If `ELEVENLABS_API_KEY` isn't set for the project, run `npx -y @elevenlabs/cli@latest onboard init` from the project root and follow what it prints. Never ask for the key in chat.
+2. `npm i @elevenlabs/elevenlabs-js`, then create `scripts/generate-audio.ts` from the `audio-integration` rule, with one `voiceover` entry per scene (`vo-scene1`, `vo-scene2`, …) and the chosen `VOICE_ID`. The model is `eleven_v4`.
+3. Run `node scripts/generate-audio.ts` from the project root. Each scene lands at `public/vo-sceneN.mp3`. To redo one line, delete its file and run the script again.
+
+The script reports **no duration**; step 4 measures the files.
+
+**Alternatives:**
+- The **ElevenLabs MCP** `text_to_speech` tool is deprecated (archived upstream) but still ships for quick interactive one-offs. It writes into `public/`; rename its output to `vo-sceneN.mp3`.
+- **KIE `generate_speech`** (remotion-media) for cheap drafts: `text`, `output_name: vo-scene1`, `voice: Eric` (21 named voices, listed in the `voiceover-sync` rule). Suno and the other KIE-resold models aren't licensed by their owners through KIE. Use KIE audio for drafts and internal work, and generate final commercial audio with ElevenLabs.
 
 ### 4. Size the Scenes with calculateMetadata
 
@@ -68,12 +65,7 @@ import { staticFile } from "remotion";
 
 ### 6. Captions (optional)
 
-Offer captions. Word-level captions follow the official `remotion-captions` skill, with TikTok-style presets from the `captions-workflow` rule. If the user only wants an `.srt` file, use:
-
-```
-Use remotion-media generate_subtitles:
-- input_file: [voiceover filename inside public/, e.g. vo-scene1.mp3]
-```
+Offer captions. They follow the official `remotion-captions` skill (word-level, `@remotion/whisper-webgpu`), with an ElevenLabs Scribe fallback when there's no GPU and TikTok-style presets from the `captions-workflow` rule. Run `/add-captions`, or `/transcribe` if the user only wants an `.srt` file.
 
 ### 7. Duck Background Music (if present)
 

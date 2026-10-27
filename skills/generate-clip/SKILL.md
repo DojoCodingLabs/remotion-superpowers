@@ -19,24 +19,27 @@ Ask the user:
 
 ### 2. Craft the Video Prompt
 
-Good video generation prompts include:
-- Scene description with action/motion
-- Camera movement (pan, zoom, dolly, crane, static)
-- Lighting and mood
-- Speed (slow motion, normal, time-lapse)
+Write a scene description, following Replicate's official `prompt-videos` skill for technique (it's model-agnostic, so it applies to Veo too). Cover the camera movement, the subject and its action, the setting, lighting and mood, and the speed.
 
 **Good prompt examples:**
-- "Slow overhead crane shot of a modern city at golden hour, cars moving on streets, warm cinematic lighting"
-- "Close-up of coffee being poured into a white mug, steam rising, soft morning light, shallow depth of field"
-- "Abstract fluid art animation, flowing metallic gold and deep blue paint, mesmerizing slow motion"
-- "Drone flying through a forest canopy, sunlight filtering through leaves, cinematic nature footage"
+- "Slow overhead crane shot of a modern city at golden hour, cars moving on the streets below, warm cinematic lighting."
+- "Close-up of coffee being poured into a white mug, steam rising, soft morning light, shallow depth of field."
+- "Abstract fluid art, flowing metallic gold and deep blue paint, mesmerizing slow motion."
+- "Drone flying through a forest canopy, sunlight filtering through the leaves, cinematic nature footage."
 
-### 3. Generate via remotion-media
+For a video, also:
+- **One continuous shot per clip**; Remotion does the cutting.
+- **No burned-in text or subtitles**, and negative space where titles go.
+- **Keep scenes consistent:** paste the same style block into every clip's prompt and keep one model for the whole video. See `skills/remotion-production/rules/video-generation.md`.
+
+### 3. Generate via remotion-media (default)
 
 ```
 Use remotion-media generate_video_from_text:
 - prompt: [crafted prompt]
 - output_name: clip-city-aerial
+- model: veo3_fast      # default; veo3 for finals
+- aspect_ratio: 16:9    # or 9:16 for shorts
 ```
 
 To animate a still instead (image-to-video):
@@ -47,47 +50,44 @@ Use remotion-media generate_video_from_image:
 - output_name: clip-animated-still
 ```
 
-The clip is saved to `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+- The clip is saved to `public/<output_name>.mp4` in the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+- **`image_urls` must be public URLs** KIE can fetch, not files in `public/`. Reuse the KIE-hosted URL that `generate_image` returns (deleted after 14 days) or a Replicate output URL (valid 1 hour).
+- KIE's Veo clips run ~8 s at 720p, 16:9 or 9:16. Plan to trim.
+- **If a KIE video call fails, fall back to Replicate (step 4).** KIE's Veo depends on a preview Google is shutting down, so errors or empty results may be permanent; don't retry in a loop.
 
-### 4. Generate via Replicate MCP (if available)
+### 4. Generate via Replicate (specific models, or when KIE fails)
 
-If the user has `REPLICATE_API_TOKEN` and wants specific models, use the Replicate MCP tools:
+It needs the local `replicate-mcp` server with `REPLICATE_API_TOKEN`. Follow Replicate's official `find-models` and `run-models` skills:
 
-**Text-to-Video:**
+1. **Search, then read the schema.** `search_models` with `body: "image to video"` (or `"text to video"`), then `get_models` (`model_owner`, `model_name`) and `list_models_examples`. Durations, resolutions and image inputs differ per model, so use only inputs that exist in the schema.
+2. **Create the prediction.** Official models: `create_models_predictions`. Community models: `create_predictions` with `version: "owner/name:<version_id>"`. Don't use `Prefer: "wait"` for video.
+
 ```
-# Wan 2.5 (open source, fast)
-replicate_create_prediction:
-  model: "wan-video/wan-2.5-t2v-fast"
+# Image-to-video with Kling v3 (check the schema first)
+create_models_predictions:
+  model_owner: "kwaivgi"
+  model_name: "kling-v3-video"
   input:
-    prompt: "[crafted prompt]"
-    num_frames: 81
-    resolution: "480p"
-```
-
-**Image-to-Video (animate a still):**
-```
-# Kling 2.6 (cinematic, top-tier I2V)
-replicate_create_prediction:
-  model: "kwaivgi/kling-v2.6-pro"
-  input:
-    image: "[image_url]"
+    start_image: "[public image URL]"
     prompt: "[motion description]"
-    duration: 5
+    # duration, aspect ratio, mode: names and allowed values from the schema
 ```
 
-Poll with `replicate_get_prediction` until status is `succeeded`, then download the output:
+3. **Poll** `get_predictions` with `prediction_id` every 10–20 s until `status` is `succeeded`, `failed` or `canceled`. Video takes minutes.
+4. **Download** the URL in `output` right away (it expires after 1 hour):
+
 ```bash
 mkdir -p public/footage
-curl -L -o public/footage/clip-[descriptive-name].mp4 "[replicate_output_url]"
+curl -L -o public/footage/clip-[descriptive-name].mp4 "<output URL>"
 ```
 
-**Model recommendations:**
-- **Fast & cheap**: Wan 2.5 Fast (`wan-video/wan-2.5-t2v-fast`) — ~40s for 5s clip
-- **High quality**: Veo 3.1 (via remotion-media) or Kling 2.6
-- **Image-to-video**: Kling 2.6 Pro (`kwaivgi/kling-v2.6-pro`) or Wan 2.5 I2V
-- **Open source**: Wan 2.5 (`wan-video/wan-2.5-t2v`) — higher quality, slower
+**Starting points, as of Oct 2026** (search and read the schema before calling):
+- **Quick default**: Veo 3.1 via remotion-media
+- **Image-to-video, cinematic**: Kling v3 (`kwaivgi/kling-v3-video`): `start_image`, optional `end_image`
+- **References (images, video)**: Seedance 2 (`bytedance/seedance-2.0`)
+- **Open-weights, cheaper**: Wan 2.7 (`wan-video/wan-2.7-t2v`, `wan-video/wan-2.7-i2v`)
 
-See `skills/remotion-production/rules/replicate-models.md` and `rules/video-generation.md` for detailed prompt engineering and model selection guidance.
+Ask for a duration that covers the scene plus about 1 s of handle, then trim in Remotion. See `skills/remotion-production/rules/replicate-models.md` and `rules/video-generation.md` for the full flow, durations and provider choice.
 
 ### 5. Show Usage in Remotion
 

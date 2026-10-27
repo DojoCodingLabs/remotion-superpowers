@@ -5,32 +5,35 @@
 Well-placed SFX elevate video quality — they make transitions feel polished, impacts feel powerful, and scenes feel immersive. There are two sources; pick in this order:
 
 1. **Hosted SFX first, for generic sounds.** The official `remotion-markup` skill (sfx.md) lists free files at `https://remotion.media/*.wav`: whoosh, whip, page-turn, switch, mouse-click, shutter-modern, shutter-old, ding, record-scratch, vine-boom and a set of meme sounds. Use the URL directly as the `<Audio>` `src`. No generation cost, no file to manage.
-2. **`generate_sound_effect` for everything else.** remotion-media's tool (ElevenLabs SFX V2) makes custom sounds: a specific impact, an ambience, a branded chime, anything with a particular length or character.
+2. **ElevenLabs for everything else.** The official ElevenLabs `sound-effects` skill (`eleven_text_to_sound_v2`, 0.5–30 s) makes custom sounds: a specific impact, an ambience, a branded chime, anything with a particular length or character. Generate them with the script in `audio-integration.md`.
 
 | Need | Source |
 |---|---|
 | Plain whoosh, click, switch, ding, camera shutter, page turn | Hosted (`https://remotion.media/whoosh.wav`, `mouse-click.wav`, `switch.wav`, `ding.wav`, `shutter-modern.wav`, `page-turn.wav`) |
 | Meme sounds for short-form (vine boom, record scratch, bruh…) | Hosted (full list in official sfx.md) |
-| Cinematic booms, risers, stingers, tension | `generate_sound_effect` |
-| Ambience (city, office, rain, nature) | `generate_sound_effect` with `loop: true` |
-| Branded or very specific sounds | `generate_sound_effect` |
-| A hosted sound that doesn't fit the tone | `generate_sound_effect` |
+| Cinematic booms, risers, stingers, tension | ElevenLabs |
+| Ambience (city, office, rain, nature) | ElevenLabs with `loop: true` |
+| Branded or very specific sounds | ElevenLabs |
+| A hosted sound that doesn't fit the tone | ElevenLabs |
 
 ## Generating Sound Effects
 
-```
-generate_sound_effect:
-  prompt: "deep bass impact hit, cinematic, powerful"   # max 450 chars
-  output_name: "sfx-impact"
-  duration_seconds: 1.5    # optional, 0.5-22; omit to let the model choose
-  loop: false              # optional; true for seamless ambience
+Add one entry per sound to the `sfx` list in `scripts/generate-audio.ts` (`audio-integration.md`):
+
+```ts
+const sfx = [
+  { name: "sfx-impact", text: "deep bass impact hit, cinematic, powerful", seconds: 1.5 },
+  { name: "sfx-city-ambiance", text: "city ambiance traffic distant sounds, urban, busy", seconds: 10, loop: true },
+];
 ```
 
-The SFX file is saved to `public/sfx-impact.mp3` in the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+`seconds` is 0.5–30; leave it out to let the model choose. `loop: true` makes a seamless ambience bed. If the result drifts from the prompt, add `promptInfluence` (0–1, default 0.3) to the `convert()` call, as the official skill shows. Each file lands at `public/<name>.mp3`.
+
+**Alternatives:** the deprecated ElevenLabs MCP `text_to_sound_effects` (interactive one-offs; rename its output to the `sfx-` convention), or KIE `generate_sound_effect` for drafts (`prompt`, `output_name: "sfx-impact"`, `duration_seconds` 0.5–22, `loop`). Suno and the other KIE-resold models aren't licensed by their owners through KIE. Use KIE audio for drafts and internal work, and generate final commercial audio with ElevenLabs.
 
 ## Prompt Engineering by Category
 
-Prompts for `generate_sound_effect`. For the transition and UI rows, try the hosted file first and generate only when you need a different character.
+Prompts for ElevenLabs SFX (the `text` field). For the transition and UI rows, try the hosted file first and generate only when you need a different character.
 
 ### Transition Sounds
 
@@ -146,5 +149,5 @@ import { staticFile } from "remotion";
 5. **Fade ambient sounds** — never start or stop ambient SFX abruptly
 6. **Match the tone** — cinematic videos need cinematic SFX, not cartoon pops
 7. **Test with music** — ensure SFX and music don't clash at the same frequencies
-8. **Save with descriptive names** — `output_name: "sfx-whoosh-transition"` not `"sfx1"`
+8. **Save with descriptive names** — `name: "sfx-whoosh-transition"` not `"sfx1"`
 9. **Don't generate what's hosted** — check the official sfx.md list before paying for a plain whoosh or click

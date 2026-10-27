@@ -51,24 +51,28 @@ Caption Style: [TikTok bold / karaoke / minimal]
 
 ### Phase 2: Generate Audio (voiceover drives everything)
 
-#### 2a. Voiceover
-Write a TIGHT script — every word must earn its place in a short. Generate one file per part:
-```
-Use remotion-media generate_speech:
-- text: [short, punchy hook line — no filler words]
-- output_name: vo-hook
-- voice: [energetic voice like Aria or Charlie for shorts]
-```
-Repeat for `vo-body`, `vo-cta` (or `vo-body1`, `vo-body2` for several body scenes). Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
+Audio comes from the **official ElevenLabs skills** (`text-to-speech`, `music`, `sound-effects`), all in one script, `scripts/generate-audio.ts` (`@elevenlabs/elevenlabs-js`, `ELEVENLABS_API_KEY`), run with `node scripts/generate-audio.ts`. See the `production-pipeline` rule (Step 4) for the file table.
 
-The tool returns the path, not the duration: measure each file in `calculateMetadata` (see the `voiceover-sync` rule and official `remotion-multimedia`).
+#### 2a. Voiceover
+Write a TIGHT script — every word must earn its place in a short. Generate one file per part with `eleven_v4`:
+```
+text-to-speech (official skill):
+- text: [short, punchy hook line — no filler words]
+- voice: [an energetic voice ID]
+- model: eleven_v4
+→ public/vo-hook.mp3
+```
+Repeat for `vo-body`, `vo-cta` (or `vo-body1`, `vo-body2` for several body scenes).
+
+Nothing returns a duration: measure each file in `calculateMetadata` (see the `voiceover-sync` rule and official `remotion-multimedia`).
 
 #### 2b. Background Music
 ```
-Use remotion-media generate_music:
-- prompt: "[mood] background music for social media short, energetic, [genre]"
-- output_name: music-bg
-- instrumental: true
+music (official skill):
+- prompt: "[mood] background music for social media short, energetic, [genre], instrumental"
+- length: the short's length
+- model: music_v2_5
+→ public/music-bg.mp3
 ```
 
 **Good short music prompts:**
@@ -76,23 +80,27 @@ Use remotion-media generate_music:
 - "dark cinematic bass, dramatic tension, no vocals, short form"
 - "chill lofi beat for educational content, relaxed, no vocals"
 
+Eleven Music is cleared for commercial use on paid plans. For quick drafts you can use remotion-media's `generate_speech` / `generate_music` (KIE) with the same `output_name`s, but Suno and the other KIE-resold models aren't licensed by their owners through KIE. Use KIE audio for drafts and internal work, and generate final commercial audio with ElevenLabs.
+
 ### Phase 3: Source Visuals
 
 Search for VERTICAL footage:
 ```
-Use Pexels videos_search:
+Use Pexels pexels_search_videos:
 - query: [keywords]
 - orientation: portrait  ← IMPORTANT: portrait for 9:16
-- size: large
+- size: medium           (Full HD is enough for 1080x1920)
+- per_page: 5
 ```
-Download into `public/footage/` (`mkdir -p public/footage`, then `curl -L -o`). Pexels doesn't require attribution, but it's appreciated.
+Get the renditions with `pexels_get_video` (`id`) and download the closest one into `public/footage/` (`mkdir -p public/footage`, then `curl -L -o`). Download only the clips you'll use. Pexels doesn't require attribution, but it's appreciated.
 
 Or generate images/clips with `aspect_ratio: "9:16"`:
 ```
-Use remotion-media generate_image / generate_video_from_text (or generate_video_from_image to animate an image)
+Use remotion-media generate_image / generate_video_from_text (or generate_video_from_image to animate an image; image_urls must be public URLs)
 - output_name: img-hook / clip-body1 / ...
 - aspect_ratio: 9:16
 ```
+If a KIE call fails, fall back to Replicate (the `replicate-models` rule: `search_models`, read the schema with `get_models`, `create_models_predictions`, download into `public/images/` or `public/footage/`).
 
 ### Phase 4: Build the Composition Live
 
@@ -113,7 +121,7 @@ Build each part while Studio is open, so the user sees the hook as soon as it ex
 
 Captions are MANDATORY for shorts. Use the same workflow as `/add-captions`:
 
-1. Transcribe each voiceover file with the official word-level flow (`remotion-captions/transcribe-captions.md`). Use `generate_subtitles` (line-level SRT) only if that can't run, and then switch to a line-at-a-time style.
+1. Transcribe each voiceover file with the official word-level flow (`remotion-captions/transcribe-captions.md`, `@remotion/whisper-webgpu`). Without a usable GPU, use ElevenLabs Scribe instead (official `speech-to-text` skill, `scribe_v2` with word timestamps) and convert it to `Caption[]` with `elevenLabsTranscriptToCaptions()` from `@remotion/elevenlabs` (https://www.remotion.dev/docs/elevenlabs). Both give word-level timing, so the TikTok styles still work.
 2. Copy the official caption element for the chosen style (Popping Word Captions for TikTok bold) and put one inside each scene, next to that scene's voiceover, with the captions inlined (official `display-captions.md`)
 3. Apply the TikTok preset from the `captions-workflow` rule: bold, high contrast, highlight color
 4. Place it 15-25% up from the bottom, clear of the platform UI

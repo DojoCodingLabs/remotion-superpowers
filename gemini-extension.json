@@ -3,50 +3,57 @@
   "version": "2.3.0",
   "description": "Full video production pipeline for Remotion — gives Claude eyes (video analysis), voice (TTS/voiceover), ears (music/SFX), stock footage, AI image/video generation, TikTok captions, 3D content, and more. By Dojo Coding Labs.",
   "mcpServers": {
-    "remotion-media": {
-      "command": "npx",
-      "args": [
-        "remotion-media-mcp"
-      ]
-    },
     "ElevenLabs": {
       "command": "uvx",
       "args": [
-        "elevenlabs-mcp"
+        "elevenlabs-mcp==0.12.2"
       ],
       "env": {
-        "ELEVENLABS_MCP_BASE_PATH": "./public/audio",
+        "ELEVENLABS_MCP_BASE_PATH": "./public",
         "ELEVENLABS_MCP_OUTPUT_MODE": "files"
       }
+    },
+    "remotion-media": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "remotion-media-mcp@1.2.2"
+      ]
     },
     "TwelveLabs": {
       "command": "npx",
       "args": [
         "-y",
         "-p",
-        "twelvelabs-mcp",
+        "twelvelabs-mcp@1.0.0",
         "twelvelabs-mcp-stdio"
       ]
     },
     "Pexels": {
-      "command": "uvx",
+      "command": "npx",
       "args": [
-        "pexels-mcp-server"
+        "-y",
+        "@hanoak/pexels-mcp-server@1.0.2"
       ]
     },
     "Replicate": {
       "command": "npx",
       "args": [
         "-y",
-        "mcp-remote",
-        "https://mcp.replicate.com/sse"
+        "replicate-mcp@0.9.0"
       ]
     }
   },
   "settings": [
     {
+      "name": "ElevenLabs API key",
+      "description": "Voiceover, sound effects and music (https://elevenlabs.io)",
+      "envVar": "ELEVENLABS_API_KEY",
+      "sensitive": true
+    },
+    {
       "name": "KIE API key",
-      "description": "Primary key for voiceover, music, sound effects, image and video generation (https://kie.ai)",
+      "description": "AI images and video clips; optional cheap audio drafts (https://kie.ai)",
       "envVar": "KIE_API_KEY",
       "sensitive": true
     },
@@ -60,12 +67,6 @@
       "name": "Pexels API key",
       "description": "Free stock footage (https://www.pexels.com/api/)",
       "envVar": "PEXELS_API_KEY",
-      "sensitive": true
-    },
-    {
-      "name": "ElevenLabs API key",
-      "description": "Optional: advanced voice features (https://elevenlabs.io)",
-      "envVar": "ELEVENLABS_API_KEY",
       "sensitive": true
     },
     {

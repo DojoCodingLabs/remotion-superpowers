@@ -2,62 +2,61 @@
 
 ## Overview
 
-Generate custom images for Remotion projects using remotion-media (KIE) or Replicate MCP. This guide covers provider selection, prompt engineering, and Remotion integration.
+Generate custom images for Remotion projects. **KIE via remotion-media is the default**; Replicate covers specific models and KIE failures. Prompt-writing technique comes from Replicate's official `prompt-images` skill (model-agnostic, so it applies to KIE prompts too). This file keeps what's specific to video: provider choice, frame sizes, and consistency across scenes.
 
 ## Provider Decision Matrix
 
-| Need | Provider | Model | Why |
+| Need | Provider | Model (as of Oct 2026) | Why |
 |---|---|---|---|
-| Quick background or thumbnail | remotion-media | Nano Banana Pro | Simplest, auto-saves |
-| High-quality photorealistic | Replicate MCP | FLUX 1.1 Pro or Imagen 4 | Best fidelity |
-| Text in image (logos, titles) | Replicate MCP | Ideogram v3 | Typography specialist |
-| Style-matched to reference | Replicate MCP | FLUX Kontext | Multi-reference input |
-| Stock photo alternative | Pexels MCP | N/A (real photos) | Free, instant, no generation |
+| Background, thumbnail, most stills | remotion-media `generate_image` | Nano Banana Pro | Simplest, auto-saves to `public/` |
+| Photoreal or several reference images | Replicate | FLUX.2 Pro / Max | `input_images[]` multi-reference |
+| Text in image (logos, titles) | Replicate | Ideogram v3 Quality / Turbo | Typography specialist |
+| Edit from one reference | Replicate | FLUX Kontext Pro | Takes a single `input_image` |
+| Real-world scene | Pexels MCP | N/A (real photos) | Free, instant, no generation |
+
+For Replicate, search with `search_models` and read the model's input schema (`get_models` / `list_models_examples`) before calling; see `replicate-models.md`.
+
+### remotion-media call
+
+```
+generate_image:
+  prompt: "<prompt>"
+  output_name: "img-hero"      # saved as public/img-hero.png
+  aspect_ratio: "16:9"         # the default is 1:1, so always pass it
+  resolution: "2K"             # default 1K; use 2K+ for 1080p compositions
+  image_urls: ["https://..."]  # optional style/subject references, up to 8, public URLs only
+```
+
+`image_urls` must be public URLs KIE can fetch, not files in `public/`. The `imageUrl` that `generate_image` returns is hosted by KIE and deleted after 14 days, so reuse it soon or re-host it.
 
 ## Prompt Engineering
 
+Follow the official `prompt-images` skill for technique: full sentences rather than keyword lists, named subjects, photographic and lighting vocabulary, text rendering, editing. What we add:
+
 ### Prompt Anatomy
 
-Build prompts with these components in order:
+Cover these components, in this order, written as natural sentences:
 
 ```
 [Subject] + [Style] + [Lighting] + [Camera/Angle] + [Color Palette] + [Modifiers]
 ```
 
-**Example:** "Modern glass office building, photorealistic, golden hour warm lighting, low angle looking up, blue and orange tones, architectural photography"
+**Example:** "A modern glass office building seen from a low angle, photographed at golden hour with warm light on the facade. Blue sky and orange reflections, architectural photography, sharp detail."
 
-### Subject Descriptions
+### Video-specific additions
 
-Be specific about what's in the scene:
-- Bad: "a city"
-- Good: "a modern downtown skyline with glass skyscrapers reflecting sunset light, busy street with taxis below"
+- **Leave room for overlays.** If Remotion will put a title or captions on the image, ask for it: "clear negative space in the lower third" or "subject on the right, empty left half".
+- **Let Remotion render the text.** Ask for "no text, no watermark, no logo" (where the model supports exclusions) and add titles in Remotion, where they stay sharp and editable. Only generate in-image text when it's part of the scene (a sign, a label), and use a typography model for it.
+- **Ken Burns needs margin.** Stills that will zoom or drift should have the subject away from the edges; the move crops 5–20%.
 
-### Style Keywords
+### Consistency across scenes
 
-| Style | Keywords |
-|---|---|
-| Photorealistic | photorealistic, photo, DSLR, 8K, ultra detailed |
-| Illustration | digital illustration, vector art, flat design, hand-drawn |
-| 3D Render | 3D render, octane render, unreal engine, blender |
-| Cinematic | cinematic still, film grain, anamorphic, movie scene |
-| Minimal | minimalist, clean, simple, whitespace, modern |
+A video is a set of images that must look like one piece:
 
-### Lighting Keywords
-
-| Mood | Keywords |
-|---|---|
-| Warm/Inviting | golden hour, warm lighting, soft sunlight, candlelit |
-| Cool/Tech | neon lighting, cold blue, LED, cyberpunk glow |
-| Dramatic | Rembrandt lighting, high contrast, chiaroscuro, spotlight |
-| Soft/Dreamy | diffused light, overcast, pastel, ethereal glow |
-| Studio | studio lighting, product photography, white background |
-
-### Negative Prompts
-
-When supported by the model, exclude unwanted elements:
-- `"no text, no watermark, no borders, no logo"`
-- `"no people, no faces"` (for abstract backgrounds)
-- `"no blur, sharp focus"` (for crisp images)
+- Write one **style block** (style, lighting, palette, lens) and paste it verbatim at the end of every scene's prompt. Change only the subject and action.
+- For a recurring character or product, repeat the same description word for word, and pass the first good image as a reference (`image_urls` on KIE, the schema's reference input on Replicate).
+- Keep one provider and one model for the whole video; mixing models changes the look.
+- Generate all scenes before building, then line them up in Studio and regenerate the outlier.
 
 ## Aspect Ratios for Remotion
 
@@ -68,7 +67,7 @@ When supported by the model, exclude unwanted elements:
 | Square | 1:1 | 1080x1080 | Instagram, thumbnails |
 | Ultra-wide | 21:9 | 2560x1080 | Cinematic letterbox |
 
-Always match the image aspect ratio to your Remotion composition's dimensions.
+Always match the image aspect ratio to your Remotion composition's dimensions. On Replicate, the aspect-ratio or size input name differs per model, so take it from the schema.
 
 ## When to Generate vs Use Stock
 
@@ -86,7 +85,7 @@ Always match the image aspect ratio to your Remotion composition's dimensions.
 ### Where the files land
 
 - **remotion-media** `generate_image` writes `public/<output_name>.png`. Put the type in the name: `output_name: "img-hero"` becomes `staticFile("img-hero.png")`.
-- **Replicate** and **Pexels** return URLs. Download them yourself: `mkdir -p public/images && curl -L -o public/images/img-hero.png "<url>"`, then `staticFile("images/img-hero.png")`.
+- **Replicate** (the prediction's `output` URL, after `get_predictions` reports `succeeded`) and **Pexels** return URLs. Download them yourself: `mkdir -p public/images && curl -L -o public/images/img-hero.png "<url>"`, then `staticFile("images/img-hero.png")`. Replicate URLs expire after 1 hour.
 
 ### Placing images
 
@@ -133,4 +132,5 @@ export const KenBurns: React.FC = () => {
 4. **Follow the asset convention** — `generate_image` saves to `public/img-<name>.png`; images you download (Replicate, Pexels) go to `public/images/`
 5. **Try stock first for real-world scenes** — AI still struggles with hands, text, and specific objects
 6. **Iterate on prompts** — generate 2-3 variations, pick the best one
-7. **Add Ken Burns to still images** — subtle motion makes stills feel cinematic in video
+7. **Keep one style block across scenes** — consistency beats individually perfect images
+8. **Add Ken Burns to still images** — subtle motion makes stills feel cinematic in video

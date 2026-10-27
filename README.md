@@ -45,9 +45,9 @@
 > /create-video "30-second promo for a coffee shop: drone shot of the city,
                  warm voiceover, background jazz, animated shop name and address"
 
-  ✓ script & scene plan       ✓ voiceover (ElevenLabs)     ✓ jazz track (Suno)
+  ✓ script & scene plan       ✓ voiceover (ElevenLabs)     ✓ jazz (Eleven Music)
   ✓ city footage (Pexels)     ✓ captions (Whisper)         ✓ transitions
-  ✓ live preview in Studio   ✓ render → out/video.mp4     ✓ AI review → fixes
+  ✓ live preview in Studio    ✓ render → out/video.mp4     ✓ AI review → fixes
 ```
 
 Remotion turns React into video, and [Remotion's official Agent Skills](https://www.remotion.dev/docs/ai/skills) teach your agent how to write it. **Remotion Superpowers** layers on top and gives your agent everything else a video needs. It can **see** (video analysis), **speak** (voiceovers), **hear** (music and SFX), **source** (stock footage and AI generation), **caption**, **transition**, and **review** its own render, then fix it.
@@ -61,7 +61,7 @@ Remotion turns React into video, and [Remotion's official Agent Skills](https://
 | [Gemini CLI](#gemini-cli) | `gemini extensions install https://github.com/DojoCodingLabs/remotion-superpowers` |
 | [Cursor, Copilot, others](#cursor-github-copilot-and-other-agents) | `npx skills add DojoCodingLabs/remotion-superpowers` |
 
-**Requires** [Node.js](https://nodejs.org) 18+ and [uv](https://astral.sh/uv) (the MCP servers run through `npx` and `uvx`), plus Remotion's official skills, which `/setup` installs for you (or run `npx skills add remotion-dev/skills`).
+**Requires** [Node.js](https://nodejs.org) 22.18+ (it runs the TypeScript audio script directly), plus the official skills this plugin builds on, which `/setup` installs for you: `npx skills add remotion-dev/skills` and `npx skills add elevenlabs/skills` (and `replicate/skills` if you use Replicate). [uv](https://astral.sh/uv) is only needed for the optional ElevenLabs MCP server.
 
 ### Claude Code
 
@@ -87,7 +87,7 @@ Export your [API keys](#api-keys) in the shell you start Codex from; the plugin 
 gemini extensions install https://github.com/DojoCodingLabs/remotion-superpowers
 ```
 
-Gemini asks for each API key during install (leave the optional ones blank). Change one later with `gemini extensions config remotion-superpowers "KIE API key"`.
+Gemini asks for each API key during install (leave the optional ones blank). Change one later with `gemini extensions config remotion-superpowers "ElevenLabs API key"`.
 
 ### Cursor, GitHub Copilot, and other agents
 
@@ -98,7 +98,7 @@ npx skills add DojoCodingLabs/remotion-superpowers
 This installs the 15 skills into every agent it detects. Then add the servers from [`.mcp.json`](.mcp.json) to your agent's MCP config and set the keys listed under each server's `env_vars`.
 
 > [!NOTE]
-> **Built on Remotion's official skills.** They own the Remotion markup, preview and render; this plugin owns the media: generating, sourcing, analyzing and reviewing it. When both are installed, each sticks to its part.
+> **Built on the official skills.** Remotion's own skills handle the markup, preview and rendering; ElevenLabs' handle voice, sound and music; Replicate's handle model choice. This plugin puts it all together for video: what to generate, where it goes, how it's timed, and the AI review loop.
 >
 > Skills and MCP servers work in every agent above. The 3 subagents in `agents/` and the hooks (API-key guard, captions tip) are Claude Code extras.
 
@@ -147,15 +147,15 @@ Run `bash scripts/ci/validate.sh` before opening a PR. CI runs the same checks.
 
 | | Capability | Powered by |
 |---|---|---|
-| 🗣️ | Voiceovers from a script | ElevenLabs TTS (via KIE) |
-| 🎵 | Background music from a mood | Suno (via KIE) |
-| 🔊 | Sound effects from a description | ElevenLabs SFX (via KIE) |
+| 🗣️ | Voiceovers from a script | ElevenLabs (`eleven_v4`) |
+| 🎵 | Background music from a mood | Eleven Music, cleared for commercial use |
+| 🔊 | Sound effects from a description | ElevenLabs SFX + Remotion's hosted SFX |
 | 📸 | Free HD/4K stock video and photos | Pexels |
-| 🖼️ | AI images | KIE + Replicate (FLUX, Imagen 4, Nano Banana Pro) |
-| 🎬 | AI video clips, text-to-video and image-to-video | KIE + Replicate (Veo 3.1, Wan, Kling) |
-| 👁️ | Video understanding: find scenes, objects, timestamps | TwelveLabs |
-| 🔄 | AI review of your render, with fixes | TwelveLabs |
-| 📝 | TikTok-style word-by-word captions | Whisper (local) + Remotion's official captions flow |
+| 🖼️ | AI images | KIE (Nano Banana Pro) + Replicate (FLUX.2, GPT Image and more) |
+| 🎬 | AI video clips, text-to-video and image-to-video | KIE (Veo 3.1) + Replicate (Kling, Seedance, Wan) |
+| 👁️ | Video understanding: describe footage, find the best moments | TwelveLabs (Pegasus) |
+| 🔄 | AI review of your render, with timestamped fixes | TwelveLabs (Pegasus) |
+| 📝 | TikTok-style word-by-word captions | Remotion's official captions (local Whisper, or ElevenLabs Scribe) |
 | 🎯 | Scene transitions: fade, slide, wipe, flip, clock-wipe | `@remotion/transitions` (official skills) |
 | 📱 | 9:16 short-form pipeline for TikTok, Reels, Shorts | Built-in presets |
 | 🎲 | 3D scenes and product showcases | `@remotion/three` (official skills) |
@@ -190,10 +190,10 @@ Your prompt → /create-video (or /create-short)
     │
     ├── 1. Studio     → Remotion Studio opens as soon as the project runs; watch it build
     ├── 2. Concept    → scenes, script, audio needs → you approve the plan
-    ├── 3. Voiceover  → per-scene TTS (remotion-media / ElevenLabs), measured for timing
-    ├── 4. Music      → background track (Suno via remotion-media)
+    ├── 3. Voiceover  → per-scene ElevenLabs TTS, measured for timing
+    ├── 4. Music      → background track (Eleven Music)
     ├── 5. SFX        → hosted or generated sound effects
-    ├── 6. Footage    → Pexels / AI images and clips / TwelveLabs analysis
+    ├── 6. Footage    → Pexels / AI images and clips (KIE, Replicate) / TwelveLabs analysis
     ├── 7. Visuals    → Remotion markup via the official skills: scenes, transitions, effects
     ├── 8. Captions   → word-level, TikTok-style
     ├── 9. Iterate    → tweak live in Studio
@@ -205,23 +205,35 @@ Your prompt → /create-video (or /create-short)
 
 | Service | Variable | Needed? | Cost | Unlocks |
 |---|---|---|---|---|
-| [KIE](https://kie.ai) | `KIE_API_KEY` | ✅ Yes | Paid | Voiceover, music, SFX, images, video |
-| [TwelveLabs](https://www.twelvelabs.io) | `TWELVELABS_API_KEY` | ✅ Yes | Free tier | Video analysis and review |
+| [ElevenLabs](https://elevenlabs.io) | `ELEVENLABS_API_KEY` | ✅ Yes | Free tier; paid for commercial music | Voiceover, music, SFX, Scribe captions |
+| [KIE](https://kie.ai) | `KIE_API_KEY` | ✅ Yes | Paid | AI images and clips (optional audio drafts) |
+| [TwelveLabs](https://www.twelvelabs.io) | `TWELVELABS_API_KEY` | ✅ Yes | Free tier | Footage analysis and AI review |
 | [Pexels](https://www.pexels.com/api/) | `PEXELS_API_KEY` | Recommended | Free | Stock photos and videos |
-| [ElevenLabs](https://elevenlabs.io) | `ELEVENLABS_API_KEY` | Optional | Free tier | Voice cloning, custom voices |
-| [Replicate](https://replicate.com) | `REPLICATE_API_TOKEN` | Optional | Pay per use | 100+ image and video models |
+| [Replicate](https://replicate.com) | `REPLICATE_API_TOKEN` | Optional | Pay per use | Specific image and video models |
 
-Captions and transcription run locally with Whisper. Install `whisper-cpp` (`brew install whisper-cpp`) or OpenAI Whisper (`pip install openai-whisper`).
+> [!IMPORTANT]
+> KIE can also generate audio (Suno music, TTS, SFX) cheaply, but it resells those models without their owners' licence. Use KIE audio for drafts only; final audio comes from ElevenLabs.
+
+Captions run locally with Whisper on a GPU (`@remotion/whisper-webgpu`), or through ElevenLabs Scribe when there isn't one.
 
 ## MCP servers
 
-The plugin configures 5 MCP servers for you:
+The plugin configures 5 MCP servers for you, each pinned to a tested version:
 
-- **remotion-media**: voiceover, music, SFX, images, video and subtitles in one server, backed by KIE and local Whisper.
-- **TwelveLabs**: video understanding, scene analysis and review.
+- **remotion-media** (KIE): AI images and video clips.
+- **TwelveLabs** (official): footage analysis and AI review.
 - **Pexels**: free stock footage and photos.
-- **ElevenLabs** (optional): advanced voice features.
-- **Replicate** (optional): 100+ image and video models.
+- **Replicate** (official, optional): hundreds of image and video models.
+- **ElevenLabs** (deprecated upstream, optional): quick interactive voice work. Voice, music and SFX normally go through the official ElevenLabs skills.
+
+## Works well with
+
+Official tools from other providers, not bundled. Add them if you want more models:
+
+- [fal MCP](https://fal.ai/docs/documentation/setting-up/mcp): hundreds of image and video models
+- [Runway MCP](https://github.com/runwayml/runway-api-mcp-server): Runway's video models
+- [Gemini skills](https://github.com/google-gemini/gemini-skills): Veo and Imagen through the Gemini API
+- **Codex:** OpenAI's official Remotion plugin covers Remotion markup; this plugin adds the media on top.
 
 ## Troubleshooting
 
@@ -236,22 +248,15 @@ You're on 2.1.0. Update to the [latest release](https://github.com/DojoCodingLab
 <summary><strong>An MCP server won't connect</strong></summary>
 
 - Check its key is set: `echo ${KIE_API_KEY:+set}`. In Gemini CLI, use `gemini extensions config` instead, because extensions don't see your shell environment.
-- `uvx` servers (ElevenLabs, Pexels) need [uv](https://astral.sh/uv). `npx` servers need Node.js 18+.
+- `npx` servers and the audio script need Node.js 22.18+. The optional ElevenLabs server (`uvx`) needs [uv](https://astral.sh/uv).
 - Restart your agent after changing keys. In Claude Code, `/mcp` shows each server's status.
-
-</details>
-
-<details>
-<summary><strong>Pexels crashes on startup</strong></summary>
-
-Known issue: `pexels-mcp-server` 0.0.4 is incompatible with `mcp` 2.x. The fix (`uvx --with "mcp[cli]<2" pexels-mcp-server`) is landing in [#10](https://github.com/DojoCodingLabs/remotion-superpowers/pull/10).
 
 </details>
 
 <details>
 <summary><strong>Generated files end up in the wrong folder</strong></summary>
 
-`remotion-media` writes to `public/` of the directory your agent was started from. Start it from the Remotion project root.
+Generated files land in `public/` of the directory your agent was started from. Start it from the Remotion project root.
 
 </details>
 
