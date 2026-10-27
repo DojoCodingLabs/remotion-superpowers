@@ -10,7 +10,7 @@ generate_music:
   output_name: "music-background"
 ```
 
-The file lands in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
+The file lands in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
 ### Prompt Tips for Better Music
 

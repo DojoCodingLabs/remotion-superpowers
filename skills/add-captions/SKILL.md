@@ -30,7 +30,7 @@ Generate word-level timestamps:
 Use remotion-media generate_subtitles:
 - input_file: [audio filename inside public/, e.g. narration-intro.mp3]
 ```
-Files land in `public/` of the directory Claude Code was launched from, so start Claude Code from the Remotion project root.
+Files land in `public/` of the directory your agent was launched from, so start your agent (Claude Code, Codex, Gemini CLI…) from the Remotion project root.
 
 This returns an SRT file with timestamps. Save to `public/captions/`.
 

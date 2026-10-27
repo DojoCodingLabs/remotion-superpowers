@@ -2,40 +2,57 @@
   "mcpServers": {
     "remotion-media": {
       "command": "npx",
-      "args": ["remotion-media-mcp"],
-      "env": {
-        "KIE_API_KEY": "${KIE_API_KEY}"
-      }
+      "args": [
+        "remotion-media-mcp"
+      ],
+      "env_vars": [
+        "KIE_API_KEY"
+      ]
     },
     "ElevenLabs": {
       "command": "uvx",
-      "args": ["elevenlabs-mcp"],
+      "args": [
+        "elevenlabs-mcp"
+      ],
       "env": {
-        "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}",
         "ELEVENLABS_MCP_BASE_PATH": "./public/audio",
         "ELEVENLABS_MCP_OUTPUT_MODE": "files"
-      }
+      },
+      "env_vars": [
+        "ELEVENLABS_API_KEY"
+      ]
     },
     "TwelveLabs": {
       "command": "npx",
-      "args": ["-y", "-p", "twelvelabs-mcp", "twelvelabs-mcp-stdio"],
-      "env": {
-        "TWELVELABS_API_KEY": "${TWELVELABS_API_KEY}"
-      }
+      "args": [
+        "-y",
+        "-p",
+        "twelvelabs-mcp",
+        "twelvelabs-mcp-stdio"
+      ],
+      "env_vars": [
+        "TWELVELABS_API_KEY"
+      ]
     },
     "Pexels": {
       "command": "uvx",
-      "args": ["pexels-mcp-server"],
-      "env": {
-        "PEXELS_API_KEY": "${PEXELS_API_KEY}"
-      }
+      "args": [
+        "pexels-mcp-server"
+      ],
+      "env_vars": [
+        "PEXELS_API_KEY"
+      ]
     },
     "Replicate": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.replicate.com/sse"],
-      "env": {
-        "REPLICATE_API_TOKEN": "${REPLICATE_API_TOKEN}"
-      }
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.replicate.com/sse"
+      ],
+      "env_vars": [
+        "REPLICATE_API_TOKEN"
+      ]
     }
   }
 }

@@ -10,13 +10,14 @@
 
 # Remotion Superpowers
 
-**A free, open-source Claude Code plugin for builders who make videos with Remotion.**
+**A free, open-source plugin for builders who make videos with Remotion. Works in Claude Code, Codex, Gemini CLI, and any agent that supports [Agent Skills](https://agentskills.io) + MCP.**
 
-A Claude Code plugin that turns Remotion from a motion graphics tool into a **full video production studio**.
+A plugin that turns Remotion from a motion graphics tool into a **full video production studio**.
 
-Gives Claude the power to **see** (video analysis), **hear** (music generation), **speak** (voiceovers), **source** (stock footage + AI generation), **caption** (TikTok-style), **transition** (professional scene cuts), and **review** (AI feedback loop) — all wired into Remotion’s React-based video pipeline.
+Gives your coding agent the power to **see** (video analysis), **hear** (music generation), **speak** (voiceovers), **source** (stock footage + AI generation), **caption** (TikTok-style), **transition** (professional scene cuts), and **review** (AI feedback loop) — all wired into Remotion’s React-based video pipeline.
 
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-201E3D?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
+[![Works with Codex & Gemini CLI](https://img.shields.io/badge/Also-Codex%20%C2%B7%20Gemini%20CLI%20%C2%B7%20Agent%20Skills-FF7151?labelColor=201E3D)](#installation)
 [![License: MIT](https://img.shields.io/badge/License-MIT-FF7151?labelColor=201E3D)](https://opensource.org/licenses/MIT)
 [![Category: Media](https://img.shields.io/badge/Category-Media-FF7151?labelColor=201E3D)](https://github.com/topics/claude-code-plugin)
 [![MCP Servers: 5](https://img.shields.io/badge/MCP%20Servers-5-FF7151?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
@@ -46,6 +47,8 @@ Gives Claude the power to **see** (video analysis), **hear** (music generation),
 
 ## Installation
 
+### Claude Code
+
 ```bash
 # In Claude Code:
 /plugin marketplace add DojoCodingLabs/remotion-superpowers
@@ -54,7 +57,34 @@ Gives Claude the power to **see** (video analysis), **hear** (music generation),
 
 That's it. Run `/setup` to configure your API keys.
 
-**Requires:** Claude Code with plugin support. MCP servers use `npx` and `uvx` — install [Node.js](https://nodejs.org) and [uv](https://astral.sh/uv) if needed.
+### Codex
+
+```bash
+codex plugin marketplace add DojoCodingLabs/remotion-superpowers
+codex plugin add remotion-superpowers@remotion-superpowers
+```
+
+Export your API keys in the shell you start Codex from (see [API Keys](#api-keys-required)); the plugin forwards them to the MCP servers. Then ask Codex to run the `setup` skill.
+
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/DojoCodingLabs/remotion-superpowers
+```
+
+Gemini prompts for each API key during install (leave the optional ones blank). Change one later with `gemini extensions config remotion-superpowers "KIE API key"`.
+
+### Cursor, GitHub Copilot, and other agents
+
+```bash
+npx skills add DojoCodingLabs/remotion-superpowers
+```
+
+This installs the 15 skills into every agent it detects. Then add the MCP servers from [`.mcp.json`](.mcp.json) to your agent's MCP config, and set the API keys listed under each server's `env_vars`.
+
+**Requires:** MCP servers use `npx` and `uvx` — install [Node.js](https://nodejs.org) and [uv](https://astral.sh/uv) if needed.
+
+**What's portable:** skills and MCP servers work in every agent above. The `agents/` subagents and the `hooks/` (API-key guard, captions tip) are Claude Code extras.
 
 ### Updating
 
@@ -107,6 +137,8 @@ Or just describe what you want:
 > name and address."
 
 ## Commands
+
+In Claude Code these are slash commands. In Codex, Gemini CLI and other agents they're skills with the same names: ask for one ("use the create-video skill") or just describe what you want.
 
 ### Production
 | Command | Description |
@@ -183,53 +215,37 @@ Your Prompt → /create-video (or /create-short)
 
 ```
 remotion-superpowers/
-├── .claude-plugin/plugin.json    # Plugin metadata (v2.1.0)
-├── .mcp.json                     # 5 MCP server configurations
-├── commands/                     # 13 slash commands
-│   ├── setup.md                  # /setup
-│   ├── create-video.md           # /create-video
-│   ├── create-short.md           # /create-short (TikTok/Reels/Shorts)
-│   ├── find-footage.md           # /find-footage
-│   ├── generate-image.md         # /generate-image
-│   ├── generate-clip.md          # /generate-clip
-│   ├── analyze-footage.md        # /analyze-footage
-│   ├── review-video.md           # /review-video
-│   ├── add-voiceover.md          # /add-voiceover
-│   ├── add-music.md              # /add-music
-│   ├── add-captions.md           # /add-captions
-│   ├── add-transitions.md        # /add-transitions
-│   └── transcribe.md             # /transcribe
-├── agents/                       # 3 specialized agents
+├── .claude-plugin/               # Claude Code plugin + marketplace manifests
+├── .codex-plugin/plugin.json     # Codex plugin manifest
+├── gemini-extension.json         # Gemini CLI extension manifest
+├── .mcp.json                     # 5 MCP server configurations (shared)
+├── skills/                       # 15 Agent Skills (SKILL.md, portable)
+│   ├── setup/                    # setup wizard
+│   ├── create-video/             # full video production from a prompt
+│   ├── create-short/             # TikTok/Reels/Shorts
+│   ├── find-footage/  generate-image/  generate-clip/
+│   ├── add-voiceover/  add-music/  transcribe/
+│   ├── add-captions/  add-transitions/
+│   ├── analyze-footage/  review-video/
+│   ├── remotion-production/      # production workflow knowledge (18 rules)
+│   └── setup-guide/              # setup & troubleshooting knowledge
+├── agents/                       # 3 Claude Code subagents
 │   ├── video-director.md         # Orchestrates full pipeline
 │   ├── media-scout.md            # Finds & evaluates media
 │   └── post-producer.md          # Reviews & iterates on quality
-├── skills/                       # Domain knowledge (18 rules)
-│   ├── remotion-production/      # Full production workflow skill
-│   └── setup-guide/              # Setup & onboarding knowledge
-├── hooks/hooks.json              # Pre/post-tool hooks (API key checks, tips)
+├── hooks/hooks.json              # Claude Code pre/post-tool hooks (API key checks, tips)
 ├── scripts/
 │   ├── setup-check.sh            # Dependency validation script
 │   ├── check-mcp-server.sh       # Pre-tool API key validation hook
-│   └── post-tool-note.sh         # Post-tool contextual tips hook
+│   ├── post-tool-note.sh         # Post-tool contextual tips hook
+│   └── ci/validate.sh            # CI checks (run before opening a PR)
+├── CHANGELOG.md
 └── README.md
 ```
 
-## v2.1 Changelog
+## Changelog
 
-- **6 new production rules**: Replicate models, image generation, video generation, sound effects, ElevenLabs advanced, asset management
-- **Replicate MCP commands fixed**: `/generate-image` and `/generate-clip` now use Replicate MCP tools instead of direct curl API calls
-- **Hooks rewritten**: `hooks.json` converted to Anthropic spec format with shell script execution (PreToolUse/PostToolUse)
-- **Full spec compliance**: All components pass Anthropic plugin specification checks
-- **18 total production rules** covering all 5 MCP servers (~85% API coverage)
-
-## v2.0 Changelog
-
-- **7 new commands**: `/create-short`, `/add-captions`, `/add-transitions`, `/generate-image`, `/generate-clip`, `/transcribe`, `/review-video`
-- **6 new production rules**: captions workflow, animation presets, 3D content, data visualization, visual effects, CI/CD rendering
-- **1 new agent**: post-producer (AI video review & iteration loop)
-- **Replicate MCP**: 5th MCP server for 100+ AI image/video models
-- **Short-form pipeline**: Optimized workflow for TikTok, Reels, YouTube Shorts
-- **Video feedback loop**: Render → Review → Fix → Repeat
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Built by Dojo Coding Labs
 

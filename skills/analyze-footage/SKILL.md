@@ -5,7 +5,7 @@ description: Analyze existing video files using TwelveLabs AI. Understand what's
 
 # Analyze Footage — AI Video Understanding
 
-You are helping the user understand their existing video files using TwelveLabs MCP. This gives Claude "eyes" to see what's in video footage.
+You are helping the user understand their existing video files using TwelveLabs MCP. This gives your agent "eyes" to see what's in video footage.
 
 **Load the `remotion-production` skill** for the `video-analysis` rule.
 
