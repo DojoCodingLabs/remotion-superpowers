@@ -8,54 +8,69 @@
   </a>
 </p>
 
-# Remotion Superpowers
+<p align="center">
+  <strong>One prompt in, a finished MP4 out.</strong><br>
+  Voiceover, music, sound effects, stock footage, AI images and clips, TikTok captions, transitions, and an AI review loop,<br>
+  all wired into <a href="https://www.remotion.dev">Remotion</a> by your coding agent.
+</p>
 
-**A free, open-source plugin for builders who make videos with Remotion. Works in Claude Code, Codex, Gemini CLI, and any agent that supports [Agent Skills](https://agentskills.io) + MCP.**
+<p align="center">
+  <a href="https://github.com/DojoCodingLabs/remotion-superpowers/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/DojoCodingLabs/remotion-superpowers?style=flat&logo=github&color=FF7151&labelColor=201E3D"></a>
+  <a href="https://github.com/DojoCodingLabs/remotion-superpowers/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/DojoCodingLabs/remotion-superpowers?style=flat&logo=github&color=FF7151&labelColor=201E3D"></a>
+  <a href="https://github.com/DojoCodingLabs/remotion-superpowers/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/DojoCodingLabs/remotion-superpowers?color=FF7151&labelColor=201E3D"></a>
+  <a href="https://github.com/DojoCodingLabs/remotion-superpowers/actions/workflows/validate.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/DojoCodingLabs/remotion-superpowers/validate.yml?branch=main&label=CI&labelColor=201E3D"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-FF7151?labelColor=201E3D"></a>
+</p>
 
-A plugin that turns Remotion from a motion graphics tool into a **full video production studio**.
+<p align="center">
+  <a href="#claude-code"><img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-plugin-201E3D?labelColor=201E3D"></a>
+  <a href="#codex"><img alt="Codex" src="https://img.shields.io/badge/Codex-plugin-201E3D?labelColor=201E3D"></a>
+  <a href="#gemini-cli"><img alt="Gemini CLI" src="https://img.shields.io/badge/Gemini%20CLI-extension-201E3D?labelColor=201E3D"></a>
+  <a href="#cursor-github-copilot-and-other-agents"><img alt="Agent Skills" src="https://img.shields.io/badge/Agent%20Skills-15-201E3D?labelColor=201E3D"></a>
+  <a href="#mcp-servers"><img alt="MCP servers" src="https://img.shields.io/badge/MCP%20servers-5-201E3D?labelColor=201E3D"></a>
+</p>
 
-Gives your coding agent the power to **see** (video analysis), **hear** (music generation), **speak** (voiceovers), **source** (stock footage + AI generation), **caption** (TikTok-style), **transition** (professional scene cuts), and **review** (AI feedback loop) — all wired into Remotion’s React-based video pipeline.
+<p align="center">
+  <a href="#install">Install</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#commands">Commands</a> ·
+  <a href="#api-keys">API keys</a> ·
+  <a href="#troubleshooting">Troubleshooting</a> ·
+  <a href="CONTRIBUTING.md">Contribute</a>
+</p>
 
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-201E3D?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
-[![Works with Codex & Gemini CLI](https://img.shields.io/badge/Also-Codex%20%C2%B7%20Gemini%20CLI%20%C2%B7%20Agent%20Skills-FF7151?labelColor=201E3D)](#installation)
-[![License: MIT](https://img.shields.io/badge/License-MIT-FF7151?labelColor=201E3D)](https://opensource.org/licenses/MIT)
-[![Category: Media](https://img.shields.io/badge/Category-Media-FF7151?labelColor=201E3D)](https://github.com/topics/claude-code-plugin)
-[![MCP Servers: 5](https://img.shields.io/badge/MCP%20Servers-5-FF7151?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
-[![Free & Open Source](https://img.shields.io/badge/Free-Open%20Source-FF7151?labelColor=201E3D)](https://github.com/DojoCodingLabs/remotion-superpowers)
+---
 
-[Get started](#installation) · [Commands](#commands) · [API keys](#api-keys-required) · [Contribute](CONTRIBUTING.md) · [Report an issue](https://github.com/DojoCodingLabs/remotion-superpowers/issues/new)
+```text
+> /create-video "30-second promo for a coffee shop: drone shot of the city,
+                 warm voiceover, background jazz, animated shop name and address"
 
-## What This Plugin Does
+  ✓ script & scene plan       ✓ voiceover (ElevenLabs)     ✓ jazz track (Suno)
+  ✓ city footage (Pexels)     ✓ captions (Whisper)         ✓ transitions
+  ✓ render → out/video.mp4    ✓ AI review → fixes → re-render
+```
 
-| Capability | Tool | What It Enables |
-|---|---|---|
-| 🎵 Music Generation | Suno (via KIE) | Generate background music from text descriptions |
-| 🗣️ Voiceovers | ElevenLabs TTS (via KIE) | Generate natural narration from scripts |
-| 🔊 Sound Effects | ElevenLabs SFX (via KIE) | Generate sound effects from descriptions |
-| 👁️ Video Analysis | TwelveLabs | "See" existing footage — find scenes, detect objects, pick timestamps |
-| 📸 Stock Footage | Pexels | Search and download free HD/4K stock video and photos |
-| 🖼️ Image Generation | KIE + Replicate | Generate images (FLUX, Imagen 4, Nano Banana Pro) |
-| 🎬 Video Generation | KIE + Replicate | Generate video clips (Veo 3.1, Wan, Kling) |
-| 📝 Captions | Whisper + @remotion/captions | TikTok-style word-by-word animated subtitles |
-| 🎯 Transitions | @remotion/transitions | Fade, slide, wipe, flip, clock-wipe between scenes |
-| 🔄 Video Review | TwelveLabs | AI watches your render and gives feedback to improve it |
-| 📱 Short-Form | Built-in presets | Optimized pipeline for TikTok, Reels, YouTube Shorts |
-| 🎲 3D Content | @remotion/three | Three.js scenes and 3D product showcases |
-| 📊 Data Viz | SVG + D3 | Animated charts, dashboards, and number counters |
-| ✨ Visual FX | @remotion/light-leaks + CSS | Film grain, vignettes, Ken Burns, Lottie animations |
-| 🚀 CI/CD | GitHub Actions | Automated rendering on PR or manual trigger |
+Remotion turns React into video. **Remotion Superpowers** gives your agent everything else a video needs. It can **see** (video analysis), **speak** (voiceovers), **hear** (music and SFX), **source** (stock footage and AI generation), **caption**, **transition**, and **review** its own render, then fix it.
 
-## Installation
+## Install
+
+| Agent | Start with (full steps below) |
+|---|---|
+| [Claude Code](#claude-code) | `/plugin marketplace add DojoCodingLabs/remotion-superpowers` |
+| [Codex](#codex) | `codex plugin marketplace add DojoCodingLabs/remotion-superpowers` |
+| [Gemini CLI](#gemini-cli) | `gemini extensions install https://github.com/DojoCodingLabs/remotion-superpowers` |
+| [Cursor, Copilot, others](#cursor-github-copilot-and-other-agents) | `npx skills add DojoCodingLabs/remotion-superpowers` |
+
+**Requires** [Node.js](https://nodejs.org) 18+ and [uv](https://astral.sh/uv) (the MCP servers run through `npx` and `uvx`).
 
 ### Claude Code
 
 ```bash
-# In Claude Code:
 /plugin marketplace add DojoCodingLabs/remotion-superpowers
 /plugin install remotion-superpowers@remotion-superpowers
 ```
 
-That's it. Run `/setup` to configure your API keys.
+Then run `/setup`.
 
 ### Codex
 
@@ -64,7 +79,7 @@ codex plugin marketplace add DojoCodingLabs/remotion-superpowers
 codex plugin add remotion-superpowers@remotion-superpowers
 ```
 
-Export your API keys in the shell you start Codex from (see [API Keys](#api-keys-required)); the plugin forwards them to the MCP servers. Then ask Codex to run the `setup` skill.
+Export your [API keys](#api-keys) in the shell you start Codex from; the plugin forwards them to the MCP servers. Then ask Codex to run the `setup` skill.
 
 ### Gemini CLI
 
@@ -72,7 +87,7 @@ Export your API keys in the shell you start Codex from (see [API Keys](#api-keys
 gemini extensions install https://github.com/DojoCodingLabs/remotion-superpowers
 ```
 
-Gemini prompts for each API key during install (leave the optional ones blank). Change one later with `gemini extensions config remotion-superpowers "KIE API key"`.
+Gemini asks for each API key during install (leave the optional ones blank). Change one later with `gemini extensions config remotion-superpowers "KIE API key"`.
 
 ### Cursor, GitHub Copilot, and other agents
 
@@ -80,25 +95,25 @@ Gemini prompts for each API key during install (leave the optional ones blank). 
 npx skills add DojoCodingLabs/remotion-superpowers
 ```
 
-This installs the 15 skills into every agent it detects. Then add the MCP servers from [`.mcp.json`](.mcp.json) to your agent's MCP config, and set the API keys listed under each server's `env_vars`.
+This installs the 15 skills into every agent it detects. Then add the servers from [`.mcp.json`](.mcp.json) to your agent's MCP config and set the keys listed under each server's `env_vars`.
 
-**Requires:** MCP servers use `npx` and `uvx` — install [Node.js](https://nodejs.org) and [uv](https://astral.sh/uv) if needed.
+> [!NOTE]
+> Skills and MCP servers work in every agent above. The 3 subagents in `agents/` and the hooks (API-key guard, captions tip) are Claude Code extras.
 
-**What's portable:** skills and MCP servers work in every agent above. The `agents/` subagents and the `hooks/` (API-key guard, captions tip) are Claude Code extras.
+<details>
+<summary><strong>Updating</strong></summary>
 
-### Updating
+| Agent | Update |
+|---|---|
+| Claude Code | `claude plugin marketplace update DojoCodingLabs/remotion-superpowers`, then `claude plugin update remotion-superpowers@remotion-superpowers`, and restart the session |
+| Codex | `codex plugin marketplace upgrade` |
+| Gemini CLI | `gemini extensions update remotion-superpowers` |
+| Agent Skills | `npx skills update` |
 
-```bash
-# Update the marketplace catalog first:
-claude plugin marketplace update DojoCodingLabs/remotion-superpowers
+</details>
 
-# Then update the plugin:
-claude plugin update remotion-superpowers@remotion-superpowers
-```
-
-Restart your Claude Code session after updating.
-
-### Local Development
+<details>
+<summary><strong>Local development</strong></summary>
 
 ```bash
 git clone https://github.com/DojoCodingLabs/remotion-superpowers.git
@@ -109,111 +124,141 @@ cd remotion-superpowers
 /plugin install remotion-superpowers
 ```
 
-## Quick Start
+Run `bash scripts/ci/validate.sh` before opening a PR. CI runs the same checks.
 
-### 1. Run setup
+</details>
 
-```
-/setup
-```
+## Quick start
 
-This walks you through:
-- Checking dependencies (Node.js, npm, Python, uv)
-- Creating or detecting a Remotion project
-- Installing Remotion skills
-- Configuring API keys for all services
-- Verifying MCP server connections
+**1. Set up.** Run `/setup` to check dependencies, create or detect a Remotion project, install Remotion's own skills, configure API keys, and verify the MCP servers.
 
-### 2. Create a video
+**2. Make a video.** Run `/create-video`, or just describe it:
 
-```
-/create-video
-```
+> "Create a 30-second promo video for a coffee shop. Include drone footage of a city, a warm voiceover, background jazz music, and animated text overlays with the shop's name and address."
 
-Or just describe what you want:
+**3. Make it better.** Run `/review-video`. The agent watches the render, lists what to fix, fixes it, and re-renders.
 
-> "Create a 30-second promo video for a coffee shop. Include drone footage of a city, 
-> a warm voiceover, background jazz music, and animated text overlays with the shop's 
-> name and address."
+> [!TIP]
+> Start your agent from the Remotion project root. Generated audio, images and clips land in that directory's `public/`.
+
+## What you get
+
+| | Capability | Powered by |
+|---|---|---|
+| 🗣️ | Voiceovers from a script | ElevenLabs TTS (via KIE) |
+| 🎵 | Background music from a mood | Suno (via KIE) |
+| 🔊 | Sound effects from a description | ElevenLabs SFX (via KIE) |
+| 📸 | Free HD/4K stock video and photos | Pexels |
+| 🖼️ | AI images | KIE + Replicate (FLUX, Imagen 4, Nano Banana Pro) |
+| 🎬 | AI video clips, text-to-video and image-to-video | KIE + Replicate (Veo 3.1, Wan, Kling) |
+| 👁️ | Video understanding: find scenes, objects, timestamps | TwelveLabs |
+| 🔄 | AI review of your render, with fixes | TwelveLabs |
+| 📝 | TikTok-style word-by-word captions | Whisper (local) + `@remotion/captions` |
+| 🎯 | Scene transitions: fade, slide, wipe, flip, clock-wipe | `@remotion/transitions` |
+| 📱 | 9:16 short-form pipeline for TikTok, Reels, Shorts | Built-in presets |
+| 🎲 | 3D scenes and product showcases | `@remotion/three` |
+| 📊 | Animated charts, dashboards, counters | SVG + D3 |
+| ✨ | Film grain, vignettes, Ken Burns, Lottie | `@remotion/light-leaks` + CSS |
+| 🚀 | Render on PR or on demand | GitHub Actions |
 
 ## Commands
 
 In Claude Code these are slash commands. In Codex, Gemini CLI and other agents they're skills with the same names: ask for one ("use the create-video skill") or just describe what you want.
 
-### Production
-| Command | Description |
-|---|---|
-| `/setup` | First-run wizard — installs everything you need |
-| `/create-video` | Full video production pipeline from concept to render |
-| `/create-short` | Short-form vertical video (TikTok, Reels, Shorts) — 9:16, captions, hooks |
+| | Command | What it does |
+|---|---|---|
+| **Produce** | `/setup` | First-run wizard: dependencies, project, keys, MCP check |
+| | `/create-video` | Full pipeline from a prompt to a rendered MP4 |
+| | `/create-short` | 9:16 vertical video with a hook-first structure and captions |
+| **Assets** | `/find-footage` | Search and download Pexels stock footage |
+| | `/generate-image` | AI backgrounds, thumbnails, characters, art |
+| | `/generate-clip` | AI clips from text or from a still image |
+| **Audio** | `/add-voiceover` | Generate narration and wire it into the composition |
+| | `/add-music` | Generate a track with fades and ducking |
+| | `/transcribe` | Audio or video to text with word-level timestamps |
+| **Polish** | `/add-captions` | Animated word-by-word captions |
+| | `/add-transitions` | Professional scene transitions |
+| **Analyze** | `/analyze-footage` | Understand existing footage with AI vision |
+| | `/review-video` | Render, review, fix, repeat |
 
-### Assets
-| Command | Description |
-|---|---|
-| `/find-footage` | Search & download stock footage from Pexels |
-| `/generate-image` | Generate AI images (backgrounds, thumbnails, art) |
-| `/generate-clip` | Generate AI video clips (text-to-video, image-to-video) |
+## How it works
 
-### Audio
-| Command | Description |
-|---|---|
-| `/add-voiceover` | Generate and add narration to your video |
-| `/add-music` | Generate and add background music |
-| `/transcribe` | Transcribe audio/video to text with timestamps |
-
-### Enhancements
-| Command | Description |
-|---|---|
-| `/add-captions` | TikTok-style animated word-by-word captions |
-| `/add-transitions` | Professional scene transitions (fade, slide, wipe, flip) |
-
-### Analysis
-| Command | Description |
-|---|---|
-| `/analyze-footage` | Use AI to understand existing video files |
-| `/review-video` | AI-powered video feedback loop — render, review, improve, repeat |
-
-## API Keys Required
-
-| Service | Variable | Required? | Cost | What It Provides |
-|---|---|---|---|---|
-| KIE | `KIE_API_KEY` | ✅ Yes | Paid | Music, SFX, TTS, images, video, subtitles |
-| TwelveLabs | `TWELVELABS_API_KEY` | ✅ Yes | Free tier | Video understanding, analysis & review |
-| Pexels | `PEXELS_API_KEY` | Recommended | Free | Stock photos & videos |
-| ElevenLabs | `ELEVENLABS_API_KEY` | Optional | Free tier | Advanced voice cloning & custom voices |
-| Replicate | `REPLICATE_API_TOKEN` | Optional | Pay-per-use | FLUX, Wan, Kling, Veo — 100+ AI models |
-
-## MCP Servers
-
-This plugin auto-configures 5 MCP servers:
-
-- **remotion-media** — Primary media generation (Suno + ElevenLabs + Whisper + more via KIE)
-- **TwelveLabs** — Video understanding, scene analysis, and video review
-- **Pexels** — Free stock footage and photos
-- **ElevenLabs** — Advanced voice features (optional)
-- **Replicate** — 100+ AI models for image/video generation (optional)
-
-## How It Works
-
-```
-Your Prompt → /create-video (or /create-short)
+```text
+Your prompt → /create-video (or /create-short)
     │
-    ├── 1. Concept    → Break into scenes, script, audio needs
-    ├── 2. Script     → Generate narration text + timing
-    ├── 3. Voiceover  → Generate TTS audio (remotion-media / ElevenLabs)
-    ├── 4. Music      → Generate background music (Suno via remotion-media)
-    ├── 5. Footage    → Search Pexels / generate with AI / analyze with TwelveLabs
-    ├── 6. Visuals    → Write Remotion React components + transitions + effects
-    ├── 7. Captions   → Generate TikTok-style animated subtitles
-    ├── 8. Compose    → Wire all assets into composition
-    ├── 9. Preview    → npm run dev (live preview)
-    ├── 10. Render   → npx remotion render (final MP4)
-    └── 11. Review   → /review-video → AI watches & gives feedback → iterate
+    ├── 1. Concept    → break into scenes, script, audio needs
+    ├── 2. Script     → narration text + timing
+    ├── 3. Voiceover  → TTS audio (remotion-media / ElevenLabs)
+    ├── 4. Music      → background track (Suno via remotion-media)
+    ├── 5. Footage    → Pexels / AI generation / TwelveLabs analysis
+    ├── 6. Visuals    → Remotion React components + transitions + effects
+    ├── 7. Captions   → TikTok-style animated subtitles
+    ├── 8. Compose    → wire every asset into the composition
+    ├── 9. Preview    → npm run dev
+    ├── 10. Render    → npx remotion render → MP4
+    └── 11. Review    → /review-video → AI watches, suggests, iterates
 ```
 
-## Project Structure
+## API keys
 
-```
+| Service | Variable | Needed? | Cost | Unlocks |
+|---|---|---|---|---|
+| [KIE](https://kie.ai) | `KIE_API_KEY` | ✅ Yes | Paid | Voiceover, music, SFX, images, video |
+| [TwelveLabs](https://www.twelvelabs.io) | `TWELVELABS_API_KEY` | ✅ Yes | Free tier | Video analysis and review |
+| [Pexels](https://www.pexels.com/api/) | `PEXELS_API_KEY` | Recommended | Free | Stock photos and videos |
+| [ElevenLabs](https://elevenlabs.io) | `ELEVENLABS_API_KEY` | Optional | Free tier | Voice cloning, custom voices |
+| [Replicate](https://replicate.com) | `REPLICATE_API_TOKEN` | Optional | Pay per use | 100+ image and video models |
+
+Captions and transcription run locally with Whisper. Install `whisper-cpp` (`brew install whisper-cpp`) or OpenAI Whisper (`pip install openai-whisper`).
+
+## MCP servers
+
+The plugin configures 5 MCP servers for you:
+
+- **remotion-media**: voiceover, music, SFX, images, video and subtitles in one server, backed by KIE and local Whisper.
+- **TwelveLabs**: video understanding, scene analysis and review.
+- **Pexels**: free stock footage and photos.
+- **ElevenLabs** (optional): advanced voice features.
+- **Replicate** (optional): 100+ image and video models.
+
+## Troubleshooting
+
+<details>
+<summary><strong>The plugin shows "failed to load"</strong></summary>
+
+You're on 2.1.0. Update to the [latest release](https://github.com/DojoCodingLabs/remotion-superpowers/releases/latest) (see Updating under [Install](#install)); 2.1.1 fixed the hooks schema.
+
+</details>
+
+<details>
+<summary><strong>An MCP server won't connect</strong></summary>
+
+- Check its key is set: `echo ${KIE_API_KEY:+set}`. In Gemini CLI, use `gemini extensions config` instead, because extensions don't see your shell environment.
+- `uvx` servers (ElevenLabs, Pexels) need [uv](https://astral.sh/uv). `npx` servers need Node.js 18+.
+- Restart your agent after changing keys. In Claude Code, `/mcp` shows each server's status.
+
+</details>
+
+<details>
+<summary><strong>Pexels crashes on startup</strong></summary>
+
+Known issue: `pexels-mcp-server` 0.0.4 is incompatible with `mcp` 2.x. The fix (`uvx --with "mcp[cli]<2" pexels-mcp-server`) is landing in [#10](https://github.com/DojoCodingLabs/remotion-superpowers/pull/10).
+
+</details>
+
+<details>
+<summary><strong>Generated files end up in the wrong folder</strong></summary>
+
+`remotion-media` writes to `public/` of the directory your agent was started from. Start it from the Remotion project root.
+
+</details>
+
+Still stuck? [Open an issue](https://github.com/DojoCodingLabs/remotion-superpowers/issues/new/choose). Search the existing ones first; there's a good chance someone has hit the same thing.
+
+<details>
+<summary><strong>Project structure</strong></summary>
+
+```text
 remotion-superpowers/
 ├── .claude-plugin/               # Claude Code plugin + marketplace manifests
 ├── .codex-plugin/plugin.json     # Codex plugin manifest
@@ -230,42 +275,43 @@ remotion-superpowers/
 │   ├── remotion-production/      # production workflow knowledge (18 rules)
 │   └── setup-guide/              # setup & troubleshooting knowledge
 ├── agents/                       # 3 Claude Code subagents
-│   ├── video-director.md         # Orchestrates full pipeline
-│   ├── media-scout.md            # Finds & evaluates media
-│   └── post-producer.md          # Reviews & iterates on quality
-├── hooks/hooks.json              # Claude Code pre/post-tool hooks (API key checks, tips)
-├── scripts/
-│   ├── setup-check.sh            # Dependency validation script
-│   ├── check-mcp-server.sh       # Pre-tool API key validation hook
-│   ├── post-tool-note.sh         # Post-tool contextual tips hook
-│   └── ci/validate.sh            # CI checks (run before opening a PR)
+├── hooks/hooks.json              # Claude Code hooks (API key checks, tips)
+├── scripts/                      # setup check, hook scripts, ci/validate.sh
 ├── CHANGELOG.md
 └── README.md
 ```
 
-## Changelog
+</details>
 
-See [CHANGELOG.md](CHANGELOG.md).
+## Star history
 
-## Built by Dojo Coding Labs
+<a href="https://star-history.com/#DojoCodingLabs/remotion-superpowers&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dojocodinglabs/remotion-superpowers&type=Date&theme=dark">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dojocodinglabs/remotion-superpowers&type=Date">
+    <img alt="Star history chart" src="https://api.star-history.com/svg?repos=dojocodinglabs/remotion-superpowers&type=Date" width="100%">
+  </picture>
+</a>
+
+If this saves you an afternoon of video editing, a ⭐ helps other builders find it.
+
+## Contributors
+
+<a href="https://github.com/DojoCodingLabs/remotion-superpowers/graphs/contributors">
+  <img alt="Contributors" src="https://contrib.rocks/image?repo=DojoCodingLabs/remotion-superpowers">
+</a>
+
+Thanks to everyone who has sent a fix, filed a sharp bug report, or forked this to build something of their own. New here? Read [CONTRIBUTING.md](CONTRIBUTING.md). Better prompt flows, new production rules, and support for more agents are all welcome.
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each release.
+
+## Built by Dojo Coding
 
 [Dojo Coding](https://dojocoding.io) is a LATAM-first tech education ecosystem. We build tools for developers and teach people to code.
 
-**remotion-superpowers** is free forever. Open source. MIT licensed.
+**More from Dojo Coding:** [CodeSensei](https://github.com/DojoCodingLabs/code-sensei) (learn to code while you vibecode) · [juan-workflow](https://github.com/DojoCodingLabs/juan-workflow) (dev lifecycle guardrails) · [VibeCoding Bootcamp](https://dojocoding.io) (structured curriculum with live mentors)
 
-### More from Dojo Coding
-
-- [CodeSensei](https://github.com/DojoCodingLabs/code-sensei) — Learn to code while you vibecode
-- [juan-workflow](https://github.com/DojoCodingLabs/juan-workflow) — Dev lifecycle guardrails
-- [VibeCoding Bootcamp](https://dojocoding.io) — Structured curriculum with live mentors
-
-## Contributing
-
-Remotion Superpowers is open source and built to be contributed to. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## License
-
-MIT License — free to use, modify, and distribute. Built by [Dojo Coding](https://dojocoding.io).
+Free forever. Open source. [MIT licensed](LICENSE).
 
 <p align="center">
   <a href="https://dojocoding.io"><img src="docs/assets/dojocoding-mark.png" alt="Dojo Coding" width="48"></a>
