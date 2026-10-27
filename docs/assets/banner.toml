@@ -1,12 +1,12 @@
 name = "Remotion Superpowers"
 tagline = "Turns Remotion into a full [video studio]"
-chips = ["13 commands / 5 MCP servers"]
-meta = "Open source · Claude Code"
+chips = ["15 skills / 5 MCP servers"]
+meta = "Open source · MIT"
 tile = "/"
 
 [card]
 kind = "terminal"
 label = "Claude Code"
-status = "v2.1 · MIT"
+status = "Codex · Gemini CLI · Cursor"
 lines = ["/plugin install remotion-superpowers", "/setup", ["/create-video", "\"30 s launch teaser\""]]
 dim = "voiceover · music · captions"
